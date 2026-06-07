@@ -1,10 +1,16 @@
 from flask import Flask
 import datetime
 from flask_apscheduler import APScheduler
+from flask_login import LoginManager
 
 from data import db_session
 from data.tasks import Task
 from data.users import User
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = ''
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 db_session.global_init("db/web-volunteers.db")
 
@@ -22,6 +28,12 @@ def archive_task():
         for user in users:
             user.current_tasks.remove(task.id)
             user.archived_tasks.append(task.id)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    db_sess = db_session.create_session()
+    return db_sess.get(User, user_id)
 
 
 if __name__ == '__main__':
