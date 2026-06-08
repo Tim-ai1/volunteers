@@ -16,6 +16,14 @@ login_manager.init_app(app)
 
 db_session.global_init("db/web-volunteers.db")
 
+# import sqlite3
+# with sqlite3.connect("db/web-volunteers.db") as conn:
+#     cursor = conn.cursor()
+#     cursor.execute("INSERT INTO roles (id, title) VALUES (1, 'Волонтёр'), (2, 'Организация')")
+#     conn.commit()
+#
+# код для заполнения таблицы roles (запускается один раз)
+
 app = Flask(__name__)
 scheduler = APScheduler()
 
@@ -47,46 +55,7 @@ def logout():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    user_form = UserRegisterForm()
-    org_form = OrgRegisterForm()
-    # if form.validate_on_submit():
-    #     if form.password.data != form.password_again.data:
-    #         return render_template('register.html', title='Регистрация',
-    #                                form=form,
-    #                                message="Пароли не совпадают")
-    #     db_sess = db_session.create_session()
-    #     if db_sess.query(User).filter(User.email == form.email.data).first():
-    #         return render_template('register.html', title='Регистрация',
-    #                                form=form,
-    #                                message="Пользователь с таким электронным адресом уже есть")
-    #     if db_sess.query(User).filter(User.username == form.username.data).first():
-    #         return render_template('register.html', title='Регистрация',
-    #                                form=form,
-    #                                message="Пользователь с таким именем уже есть")
-    #     user = User(
-    #         username=form.username.data,
-    #         email=form.email.data,
-    #         birth_date=form.birth_date.data,
-    #         info=form.info.data,
-    #         pfp=None,
-    #     )
-    #     user.set_password(form.password.data)
-    #     db_sess.add(user)
-    #     db_sess.commit()
-    #     if form.pfp.data:
-    #         f = form.pfp.data
-    #         filename = secure_filename(f.filename)
-    #         os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'pfp', str(user.id)))
-    #         path = os.path.join(app.config['UPLOAD_FOLDER'], 'pfp', str(user.id), filename)
-    #         f.save(path)
-    #         pfp = filename
-    #     else:
-    #         pfp = None
-    #
-    #     user.pfp = pfp
-    #     db_sess.commit()
-    #     return redirect('/login')
-    # return render_template('register.html', title='Регистрация', form=form)
+    pass
 
 
 if __name__ == '__main__':
