@@ -3,7 +3,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from sqlalchemy_serializer import SerializerMixin
 from .db_session import SqlAlchemyBase
-from sqlalchemy.ext.mutable import MutableList
 
 
 class User(SqlAlchemyBase, UserMixin, SerializerMixin):
@@ -17,8 +16,6 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     address = sqlalchemy.Column(sqlalchemy.String)
     info = sqlalchemy.Column(sqlalchemy.String)
     hashed_password = sqlalchemy.Column(sqlalchemy.String)
-    current_tasks = sqlalchemy.Column(MutableList.as_mutable(sqlalchemy.JSON), default=[])
-    archived_tasks = sqlalchemy.Column(MutableList.as_mutable(sqlalchemy.JSON), default=[])
     role_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('roles.id'))
 
     def set_password(self, password):
