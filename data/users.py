@@ -12,11 +12,14 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     name = sqlalchemy.Column(sqlalchemy.String, unique=True)
     email = sqlalchemy.Column(sqlalchemy.String, unique=True)
-    age = sqlalchemy.Column(sqlalchemy.Integer)
+    phone_number = sqlalchemy.Column(sqlalchemy.String, unique=True)
+    birth_date = sqlalchemy.Column(sqlalchemy.Date)
+    address = sqlalchemy.Column(sqlalchemy.String)
     info = sqlalchemy.Column(sqlalchemy.String)
     hashed_password = sqlalchemy.Column(sqlalchemy.String)
     current_tasks = sqlalchemy.Column(MutableList.as_mutable(sqlalchemy.JSON), default=[])
     archived_tasks = sqlalchemy.Column(MutableList.as_mutable(sqlalchemy.JSON), default=[])
+    role_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('roles.id'))
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
