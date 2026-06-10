@@ -9,7 +9,7 @@
 </head>
 <body>
 <header class="site-header">
-    <a href="{{ url_for('base') }}" class="site-logo">Волонтёриум</a>
+    <a href="{{ url_for('index') }}" class="site-logo">Волонтёриум</a>
     <img src='static/images/img.png' alt="несмешная картинка" class="logo">
     <nav class="header-actions" aria-label="Основная навигация">
         <a href="{{ url_for('register') }}" class="header-link header-register">Регистрация</a>
@@ -17,49 +17,21 @@
     </nav>
 </header>
     {% block content %}
-<section class="hero-banner">
-    <img src="{{ url_for('static', filename='images/banner.png') }}" alt="Главный баннер">
-    <div class="hero-overlay">
-        <div class="hero-title">Волонтёриум</div>
-        <p class="hero-subtitle">Платформа для волонтеров, организаторов и добрых дел</p>
-    </div>
-</section>
-<main class="page-content">
-    <section class="features-section">
-        <article class="feature-card">
-            <span class="feature-number">01</span>
-            <h2>Мероприятия для волонтеров</h2>
-            <p>Находите задачи, которые подходят по времени, интересам и месту.</p>
-        </article>
-        <article class="feature-card feature-card-accent">
-            <span class="feature-number">02</span>
-            <h2>Организаторам мероприятий</h2>
-            <p>Создавайте события и собирайте команду помощников быстрее.</p>
-        </article>
-        <article class="feature-card">
-            <span class="feature-number">03</span>
-            <h2>О платформе</h2>
-            <p>Все важное для участия и организации собрано в одном понятном месте.</p>
-        </article>
-    </section>
-    <section class="steps-section">
-        <h2>Как это работает?</h2>
-        <div class="steps-grid">
-            <div class="step-item">
-                <span>1</span>
-                <p>Зарегистрируйся</p>
-            </div>
-            <div class="step-item">
-                <span>2</span>
-                <p>Откликайся на задания</p>
-            </div>
-            <div class="step-item">
-                <span>3</span>
-                <p>Выполняй добрые дела</p>
-            </div>
-        </div>
-    </section>
     {% endblock %}
+<footer id="main-footer">
+<div>
+    <h3>Почта</h3>
+    <h4>strategy@strategy48.ru</h4>
+</div>
+<div>
+    <h3>Горячая линиия</h3>
+    <h4>+7 (474) 256-61-06</h4>
+</div>
+<div>
+    <h3>Адрес</h3>
+    <h4>ул. 40 лет Октября, 39, Липецк.</h4>
+</div>
+</footer>
 </main>
 </body>
 </html>
