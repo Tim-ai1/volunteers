@@ -1,18 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Регистрация</title>
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <div class="switch-container">
-        <input type="radio" id="volunteer" name="user-type" checked>
-        <input type="radio" id="organization" name="user-type">
-        <label for="volunteer" class="switch-label">Волонтёр</label>
-        <label for="organization" class="switch-label">Организация</label>
-        <div class="switch-slider"></div>
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="auth-page">
+    <div class="auth-card">
+        <div class="role-switch" aria-label="Выбор типа регистрации">
+            <button class="role-option role-option-active" type="button" data-role="volunteer" aria-pressed="true">
+                Волонтёр
+            </button>
+            <button class="role-option" type="button" data-role="organization" aria-pressed="false">Организация</button>
+        </div>
+        <div class="role-content role-content-active" data-content="volunteer">
+            <label class="name_inp" for="name_person">Имя:</label>
+            <input class="name_inp" type="text" id="name_person" placeholder="Введите ваше имя" required>
+            <label class="sirname_inp" for="name_person">Фамилия:</label>
+            <input class="sirname_inp" type="text" id="name_person" placeholder="Введите вашу фамилию" required>
+        </div>
+
+        <div class="role-content" data-content="organization">
+            Тут форма организации
+        </div>
     </div>
-</body>
-</html>
+</section>
+
+<script>
+    document.querySelectorAll('.role-option').forEach((button) => {
+    button.addEventListener('click', () => {
+        const selectedRole = button.dataset.role;
+
+        document.querySelectorAll('.role-option').forEach((item) => {
+            item.classList.remove('role-option-active');
+            item.setAttribute('aria-pressed', 'false');
+        });
+
+        button.classList.add('role-option-active');
+        button.setAttribute('aria-pressed', 'true');
+
+        document.querySelectorAll('.role-content').forEach((content) => {
+            content.classList.toggle(
+                'role-content-active',
+                content.dataset.content === selectedRole
+            );
+        });
+    });
+});
+</script>
+{% endblock content %}

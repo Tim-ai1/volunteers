@@ -1,24 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Вход</title>
-</head>
-<body>
-{% if error %}
-        <div style="color: red; margin-bottom: 10px;">
-            {{ error }}
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="auth-page">
+    <div class="auth-card">
+        <div class="role-switch" aria-label="Выбор типа входа">
+            <button class="role-option role-option-active" type="button" data-role="volunteer" aria-pressed="true">Волонтёр</button>
+            <button class="role-option" type="button" data-role="organization" aria-pressed="false">Организация</button>
         </div>
-    {% endif %}
-<form method="POST">
-    {{ form.csrf_token }}
-    {{ form.email.label }}<br>
-    {{ form.email() }}<br><br>
-    {{ form.password.label }}<br>
-    {{ form.password() }}<br><br>
-    {{ form.remember_me.label }}<br>
-    {{ form.remember_me() }}<br><br>
-    {{ form.submit() }}
-</form>
-</body>
-</html>
+    </div>
+</section>
+
+<script>
+    document.querySelectorAll('.role-option').forEach((button) => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('.role-option').forEach((item) => {
+                item.classList.remove('role-option-active');
+                item.setAttribute('aria-pressed', 'false');
+            });
+
+            button.classList.add('role-option-active');
+            button.setAttribute('aria-pressed', 'true');
+        });
+    });
+</script>
+{% endblock content %}
