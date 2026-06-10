@@ -290,3 +290,19 @@ body {
     width: 76px;
     height: 76px;
 }
+
+#main-footer{
+    width: 100vw;
+    height: 32vh;
+    background-color: #ffffff;
+    color: var(--mint-dark);
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+}
+
+#main-footer div {
+    flex: 1;
+    padding: 10vh;
+    padding-left: 8vw;
+}
