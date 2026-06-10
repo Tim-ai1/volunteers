@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="switch-container">
+        <input type="radio" id="volunteer" name="user-type" checked>
+        <input type="radio" id="organization" name="user-type">
+        <label for="volunteer" class="switch-label">Волонтёр</label>
+        <label for="organization" class="switch-label">Организация</label>
+        <div class="switch-slider"></div>
+    </div>
+</body>
+</html>

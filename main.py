@@ -1,4 +1,4 @@
-from flask import Flask, redirect
+from flask import Flask, redirect, render_template
 import datetime
 from flask_apscheduler import APScheduler
 from flask_login import LoginManager, login_required, logout_user
@@ -55,10 +55,20 @@ def logout():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    pass
+    return render_template('register.html')
+
+
+@app.route('/')
+def base():
+    return render_template('base.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    return render_template('login.html')
 
 
 if __name__ == '__main__':
     scheduler.init_app(app)
     scheduler.start()
-    app.run()
+    app.run(host='127.0.0.1', port=5001, debug=True)
