@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Верификация</title>
+</head>
+<body>
+    <h2>Подтверждение регистрации</h2>
+
+    {% if error %}
+        <div style="color: red; margin-bottom: 10px;">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form method="POST">
+        {{ form.csrf_token }}
+        {{ form.code.label }}<br>
+        {{ form.code(size=6, maxlength=6) }}<br><br>
+        {{ form.submit() }}
+    </form>
+</body>
+</html>

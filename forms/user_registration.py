@@ -13,4 +13,4 @@ class UserRegisterForm(FlaskForm):
     name = StringField('Имя', validators=[DataRequired()])
     birth_date = DateField('Дата рождения', format='%Y-%m-%d', validators=[DataRequired()])
     info = StringField('О себе')
-    submit = SubmitField('Создать аккаунт')
+    submit = SubmitField('Продолжить')

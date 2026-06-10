@@ -59,8 +59,8 @@ def register():
 
 
 @app.route('/')
-def index():
-    return render_template('index.html')
+def base():
+    return render_template('base.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
