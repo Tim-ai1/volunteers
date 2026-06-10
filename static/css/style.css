@@ -11,11 +11,22 @@
     box-sizing: border-box;
 }
 
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
 body {
     margin: 0;
     font-family: "Segoe UI", sans-serif;
     color: var(--text);
     background: linear-gradient(180deg, var(--white) 0%, rgba(144, 209, 202, 0.2) 100%);
+}
+
+main {
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .site-header {
@@ -144,9 +155,9 @@ body {
 
 .features-section {
     width: min(1120px, calc(100% - 36px));
-    margin: -74px auto 0;
+    margin: 56px auto 0;
     position: relative;
-    z-index: 2;
+    z-index: 1;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 22px;
@@ -257,7 +268,7 @@ body {
     }
 
     .features-section {
-        margin-top: -42px;
+        margin-top: 36px;
     }
 }
 
@@ -283,7 +294,7 @@ body {
 }
 
 #main-footer{
-    width: 100vw;
+    width: 100%;
     height: 32vh;
     background-color: #ffffff;
     color: var(--mint-dark);
@@ -294,8 +305,8 @@ body {
 
 #main-footer div {
     flex: 1;
-    padding: 10vh;
-    padding-left: 8vw;
+    min-width: 0;
+    padding: 10vh clamp(18px, 6vw, 8vw);
 }
 .logo
 {
@@ -316,12 +327,38 @@ body {
 }
 
 .auth-page {
+    position: relative;
     min-height: calc(100vh - 76px);
     display: flex;
     align-items: flex-start;
     justify-content: center;
     padding: clamp(36px, 8vh, 74px) 18px 42px;
     background: #90D1CA;
+}
+
+.auth-home-link {
+    position: absolute;
+    top: 18px;
+    right: clamp(18px, 5vw, 64px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    color: #FFFFFF;
+    background: #096B68;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 12px 28px rgba(9, 107, 104, 0.18);
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.auth-home-link:hover {
+    color: #FFFFFF;
+    background: #129990;
+    transform: translateY(-2px);
 }
 
 .auth-card {
@@ -367,6 +404,15 @@ body {
 }
 
 @media (max-width: 560px) {
+    .auth-page {
+        padding-top: 88px;
+    }
+
+    .auth-home-link {
+        top: 22px;
+        right: 18px;
+    }
+
     .auth-card {
         padding: 24px;
     }
@@ -374,6 +420,15 @@ body {
     .role-option {
         padding: 12px 10px;
         font-size: 14px;
+    }
+
+    #main-footer {
+        height: auto;
+        flex-direction: column;
+    }
+
+    #main-footer div {
+        padding: 22px 18px;
     }
 }
 .role-content {

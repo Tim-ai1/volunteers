@@ -12,10 +12,16 @@
 <header class="site-header">
     <a href="{{ url_for('index') }}" class="site-logo">Волонтёриум</a>
     <img src='static/images/img.png' alt="несмешная картинка" class="logo">
+    {% if request.endpoint not in ['login', 'register'] %}
     <nav class="header-actions" aria-label="Основная навигация">
         <a href="{{ url_for('register') }}" class="header-link header-register">Регистрация</a>
         <a href="{{ url_for('login') }}" class="header-link header-login">Войти</a>
     </nav>
+    {% else %}
+    <nav class="header-actions" aria-label="Основная навигация">
+        <a href="{{ url_for('index') }}" class="auth-home-link">Главная</a>
+    </nav>
+    {% endif %}
 </header>
     {% block content %}
     {% endblock %}
