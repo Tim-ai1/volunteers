@@ -1,5 +1,7 @@
-from flask import Flask, redirect, render_template
+from flask import Flask, redirect, request, url_for, render_template, session
 import datetime
+from email.utils import parsedate_to_datetime
+import random
 from flask_apscheduler import APScheduler
 from flask_login import LoginManager, login_required, logout_user
 
@@ -8,11 +10,13 @@ from data.tasks import Task
 from data.users import User
 from forms.org_registration import OrgRegisterForm
 from forms.user_registration import UserRegisterForm
+from forms.verification import VerifForm
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = ''
+app.config['SECRET_KEY'] = 'your-secret-key-123456789'
 login_manager = LoginManager()
 login_manager.init_app(app)
+scheduler = APScheduler()
 
 db_session.global_init("db/web-volunteers.db")
 
@@ -24,8 +28,6 @@ db_session.global_init("db/web-volunteers.db")
 #
 # код для заполнения таблицы roles (запускается один раз)
 
-app = Flask(__name__)
-scheduler = APScheduler()
 
 
 @scheduler.task('interval', hours=1)
@@ -38,6 +40,19 @@ def archive_task():
         for user in users:
             user.current_tasks.remove(task.id)
             user.archived_tasks.append(task.id)
+
+
+def check_form(form):
+    db_sess = db_session.create_session()
+    if form.password.data != form.password_again.data:
+        return 'Пароли не совпадают'
+    elif db_sess.query(User).filter(User.email == form.email.data).first():
+        return 'Аккаунт с этой почтой уже существует'
+    elif db_sess.query(User).filter(User.phone_number == form.phone_number.data).first():
+        return 'Аккаунт с этим номером телефона уже существует'
+    elif db_sess.query(User).filter(User.name == form.name.data).first():
+        return 'Аккаунт с таким именем уже существует'
+    return None
 
 
 @login_manager.user_loader
@@ -53,22 +68,89 @@ def logout():
     return redirect("/")
 
 
+@app.route('/')
+def index():
+    return 'index'
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    return render_template('register.html')
+    state = request.args.get('state')
+    if state == 'volunteer':
+        form = UserRegisterForm()
+        if form.validate_on_submit():
+            error = check_form(form)
+            if error:
+                return render_template('test.html', form=form)
+            user_data = {
+                'name':form.name.data,
+                'email':form.email.data,
+                'phone_number':form.phone_number.data,
+                'birth_date':form.birth_date.data,
+                'info':form.info.data,
+                'role_id':1,
+                'password': form.password.data
+            }
+            session['user_data'] = user_data
+            code = str(random.randint(0, 999999))
+            code = '0' * (6 - len(code)) + code
+            session['code'] = code
+            return redirect("/verification")
+        return render_template('test.html', form=form)
+    elif state == 'organization':
+        form = OrgRegisterForm()
+        if form.validate_on_submit():
+            error = check_form(form)
+            if error:
+                return render_template('test.html', form=form)
+            user_data = {
+                'name': form.name.data,
+                'email': form.email.data,
+                'phone_number': form.phone_number.data,
+                'info': form.info.data,
+                'address': form.address.data,
+                'role_id': 2,
+                'password': form.password.data
+            }
+            session['user_data'] = user_data
+            code = str(random.randint(0, 999999))
+            code = '0' * (6 - len(code)) + code
+            session['code'] = code
+            return redirect("/verification")
+        return render_template('test.html', form=form)
 
 
-@app.route('/')
-def base():
-    return render_template('base.html')
-
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    return render_template('login.html')
+@app.route('/verification', methods=['GET', 'POST'])
+def verification():
+    user_data = session.get('user_data')
+    code = session.get('code')
+    print(code) # потом будет отправка на почту
+    form = VerifForm()
+    if request.method == 'GET':
+        return render_template('test2.html', form=form)
+    if form.validate_on_submit():
+        if form.code.data == code:
+            user = User(
+                name=user_data['name'],
+                email=user_data['email'],
+                phone_number=user_data['phone_number'],
+                info=user_data['info'],
+                role_id=user_data['role_id']
+            )
+            user.set_password(user_data['password'])
+            if 'address' in user_data:
+                user.address = user_data['address']
+            if 'birth_date' in user_data:
+                dt = parsedate_to_datetime(user_data['birth_date'])
+                user.birth_date = dt.date()
+            db_sess = db_session.create_session()
+            db_sess.add(user)
+            db_sess.commit()
+            return redirect('/')
+        return 'нет'
 
 
 if __name__ == '__main__':
     scheduler.init_app(app)
     scheduler.start()
-    app.run(host='127.0.0.1', port=5001, debug=True)
+    app.run()

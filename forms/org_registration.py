@@ -11,4 +11,4 @@ class OrgRegisterForm(FlaskForm):
     name = StringField('Название организации', validators=[DataRequired()])
     info = StringField('Об организации')
     address = StringField('Адрес')
-    submit = SubmitField('Создать аккаунт')
+    submit = SubmitField('Продолжить')
