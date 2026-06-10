@@ -3,11 +3,12 @@ import datetime
 from email.utils import parsedate_to_datetime
 import random
 from flask_apscheduler import APScheduler
-from flask_login import LoginManager, login_required, logout_user
+from flask_login import LoginManager, login_required, logout_user, login_user
 
 from data import db_session
 from data.tasks import Task
 from data.users import User
+from forms.login import LoginForm
 from forms.org_registration import OrgRegisterForm
 from forms.user_registration import UserRegisterForm
 from forms.verification import VerifForm
@@ -148,6 +149,19 @@ def verification():
             db_sess.commit()
             return redirect('/')
         return 'нет'
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.email == form.email.data).first()
+        if user.check_password(form.password.data):
+            login_user(user, remember=form.remember_me.data)
+            return redirect('/')
+        return render_template('login.html', form=form, error='Неверный логин/пароль')
+    return render_template('login.html', form=form)
 
 
 if __name__ == '__main__':
