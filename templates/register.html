@@ -2,7 +2,11 @@
 
 {% block content %}
 <section class="auth-page">
-    <div class="auth-card">
+    <form class="auth-card" action="{{ url_for('register') }}" method="post">
+        <input type="hidden" name="role" id="selected_role" value="volunteer">
+        <div class="reg_label">
+            <h2>Регистрация</h2>
+        </div>
         <div class="role-switch" aria-label="Выбор типа регистрации">
             <button class="role-option role-option-active" type="button" data-role="volunteer" aria-pressed="true">
                 Волонтёр
@@ -10,23 +14,64 @@
             <button class="role-option" type="button" data-role="organization" aria-pressed="false">Организация</button>
         </div>
         <div class="role-content role-content-active" data-content="volunteer">
-            <label class="name_inp" for="name_person">Имя:</label>
-            <input class="name_inp" type="text" id="name_person" placeholder="Введите ваше имя" required>
-            <br>
-            <label class="sirname_inp" for="name_person">Фамилия:</label>
-            <input class="sirname_inp" type="text" id="name_person" placeholder="Введите вашу фамилию" required>
+            <div class="volunteer-fields">
+                <label class="form-field" for="first_name">
+                    <span>Имя</span>
+                    <input type="text" id="first_name" name="first_name" placeholder="Введите ваше имя"
+                           autocomplete="given-name" required>
+                </label>
+                <label class="form-field" for="last_name">
+                    <span>Фамилия</span>
+                    <input type="text" id="last_name" name="last_name" placeholder="Введите вашу фамилию"
+                           autocomplete="family-name" required>
+                </label>
+                <label class="form-field" for="email">
+                    <span>Почта</span>
+                    <input type="text" id="email" name="email" placeholder="Введите вашу почту"
+                           autocomplete="email" required>
+                </label>
+                <label class="form-field" for="password">
+                    <span>Пароль</span>
+                    <input type="text" id="password" name="password" placeholder="Введите пароль"
+                           autocomplete="new-password" required>
+                </label>
+                <label class="form-field" for="about_self">
+                    <span>О себе</span>
+                    <textarea id="about_self" name="about_self" placeholder="Расскажите о себе" rows="5"
+                              required></textarea>
+                </label>
+                <label class="form-field" for="birthday">
+                    <span>Дата рождения</span>
+                    <input type="date" id="birthday" name="birthday" placeholder="Введите дату рождения"
+                           autocomplete=""
+                           required>
+                </label>
+                <label class="form-field" for="number">
+                    <span>Номер телефона</span>
+                    <input type="number" id="number" name="number" placeholder="Введите номер телефона"
+                           autocomplete="tel"
+                           required>
+                </label>
+            </div>
         </div>
 
         <div class="role-content" data-content="organization">
-            Тут форма организации
+            <div class="volunteer-fields">
+                <label class="form-field" for="name_org">
+                    <span>Название организации</span>
+                    <input type="text" id="name_org" name="name" placeholder="Введите название организации" required>
+                </label>
+            </div>
         </div>
-    </div>
+        <button class="auth_button" type="submit">Зарегистрироваться</button>
+    </form>
 </section>
 
 <script>
     document.querySelectorAll('.role-option').forEach((button) => {
     button.addEventListener('click', () => {
         const selectedRole = button.dataset.role;
+        document.getElementById('selected_role').value = selectedRole;
 
         document.querySelectorAll('.role-option').forEach((item) => {
             item.classList.remove('role-option-active');
