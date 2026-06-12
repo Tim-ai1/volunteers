@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy import orm
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from sqlalchemy_serializer import SerializerMixin
@@ -17,6 +18,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     info = sqlalchemy.Column(sqlalchemy.String)
     hashed_password = sqlalchemy.Column(sqlalchemy.String)
     role_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('roles.id'))
+    user_tasks = orm.relationship('UserTask', back_populates='user')
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
