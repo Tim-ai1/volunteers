@@ -2,6 +2,8 @@ from flask import Flask, redirect, request, url_for, render_template, session
 import datetime
 from email.utils import parsedate_to_datetime
 import random
+import os
+from werkzeug.utils import secure_filename
 from flask_apscheduler import APScheduler
 from flask_login import LoginManager, login_required, logout_user, login_user, current_user
 
@@ -13,9 +15,11 @@ from forms.login import LoginForm
 from forms.org_registration import OrgRegisterForm
 from forms.user_registration import UserRegisterForm
 from forms.verification import VerifForm
+from forms.create_task import CreateTaskForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-123456789'
+app.config['UPLOAD_FOLDER'] = 'static/upload'
 login_manager = LoginManager()
 login_manager.init_app(app)
 scheduler = APScheduler()
@@ -67,11 +71,13 @@ def logout():
 
 @app.route('/')
 def index():
-    return 'index'
+    return render_template('index.html')
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return 'вы уже зарегистрированы'
     state = request.args.get('state')
     if state == 'volunteer':
         form = UserRegisterForm()
@@ -85,7 +91,7 @@ def register():
                 'phone_number':form.phone_number.data,
                 'birth_date':form.birth_date.data,
                 'info':form.info.data,
-                 'role_id':1,
+                'role_id':1,
                 'password': form.password.data
             }
             session['user_data'] = user_data
@@ -193,6 +199,43 @@ def take_part(task_id):
     db_sess.add(user_task)
     db_sess.commit()
     return 'готово'
+
+
+@app.route('/create_task', methods=['GET', 'POST'])
+def create_task():
+    if current_user.role_id != 2:
+        return 'отказано'
+    form = CreateTaskForm()
+    if form.validate_on_submit():
+        if form.start_date.data > form.end_date.data:
+            return render_template('create_task.html', form=form, error='Дата конца раньше даты начала')
+        task = Task(
+            author_id=current_user.id,
+            name=form.name.data,
+            info=form.info.data,
+            url_pic=None,
+            start_date=form.start_date.data,
+            end_date=form.end_date.data,
+            address=form.address.data,
+            people_count=form.people_count.data,
+            tags=form.tags.data
+        )
+        db_sess = db_session.create_session()
+        db_sess.add(task)
+        db_sess.commit()
+        if form.files.data and form.files.data[0].filename:
+            files = []
+            os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'tasks', str(task.id)))
+            for f in form.files.data:
+                filename = secure_filename(f.filename)
+                path = os.path.join(app.config['UPLOAD_FOLDER'], 'tasks', str(task.id), filename)
+                f.save(path)
+                files.append(filename)
+            task.url_pic = ','.join(files)
+            db_sess.commit()
+        return redirect('/')
+    return render_template('create_task.html', form=form)
+
 
 
 if __name__ == '__main__':
