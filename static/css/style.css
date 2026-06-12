@@ -519,3 +519,27 @@ main {
     background: var(--mint);
     transform: translateY(-2px);
 }
+#div-task {
+    width: 60vw;
+    align-content: center;
+    justify-content: center;
+}
+
+#div-task h2 {
+    color: #129990;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 20vh;
+}
+
+#div-task img {
+    width: 50vw;
+    border-radius: 3vh;
+}
+
+#div-task button {
+    border-radius: 5vh;
+}
+
+#vol-events {
+    color: #129990;
+}

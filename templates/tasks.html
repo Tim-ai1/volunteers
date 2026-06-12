@@ -1,0 +1,14 @@
+{% extends "./base.html" %}
+
+{% block content %}
+<h1 id="vol-events">Мероприятия для волонтёров</h1>
+
+{% for task in tasks %}
+<div id="div-task">
+    <h2>{{ task.name }}</h2>
+    <img src="{{ url_for('static', filename=task.url_pic) }}" alt="Фотография не загружена">
+    <a href="#"><button>Принять участие</button></a>
+</div>
+{% endfor %}
+
+{% endblock %}
