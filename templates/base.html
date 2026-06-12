@@ -23,6 +23,7 @@
     </nav>
     {% endif %}
 </header>
+{% block hero %}
 <section class="hero-banner">
     <img src="{{ url_for('static', filename='images/banner.png') }}" alt="Главный баннер">
     <div class="hero-overlay">
@@ -30,6 +31,7 @@
         <p class="hero-subtitle">Платформа для волонтеров, организаторов и добрых дел</p>
     </div>
 </section>
+{% endblock %}
     {% block content %}
     {% endblock %}
 {% if request.endpoint not in ['login', 'register'] %}

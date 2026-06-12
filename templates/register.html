@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
 
+{% block hero %}{% endblock %}
+
 {% block content %}
 <section class="auth-page">
-    <form class="auth-card" action="{{ url_for('register') }}" method="post">
+    <form class="auth-card" id="register_form" action="{{ url_for('register', state='volunteer') }}" method="post" data-register-url="{{ url_for('register') }}">
         <input type="hidden" name="role" id="selected_role" value="volunteer">
         <div class="reg_label">
             <h2>Регистрация</h2>
@@ -59,31 +61,31 @@
             <div class="volunteer-fields">
                 <label class="form-field" for="name_org">
                     <span>Название организации</span>
-                    <input type="text" id="name_org" name="name" placeholder="Введите название организации" required>
+                    <input type="text" id="name_org" name="name" placeholder="Введите название организации" required disabled>
                 </label>
                 <label class="form-field" for="email_org">
                     <span>Почта</span>
                     <input type="text" id="email_org" name="email_org" placeholder="Введите почту" required
-                           autocomplete="email">
+                           autocomplete="email" disabled>
                 </label>
                 <label class="form-field" for="password_org">
                     <span>Почта</span>
                     <input type="password" id="password_org" name="password_org" placeholder="Введите пароль" required
-                           autocomplete="new-password">
+                           autocomplete="new-password" disabled>
                 </label>
                 <label class="form-field" for="about_org">
                     <span>Информация</span>
                     <textarea id="about_org" name="about_org" placeholder="Расскажите об организации" rows="5"
-                              required></textarea>
+                              required disabled></textarea>
                 </label>
                 <label class="form-field" for="number_org">
                     <span>Телефон</span>
                     <input type="number" id="number_org" name="number_org" placeholder="Введите номер телефона" required
-                           autocomplete="tel">
+                           autocomplete="tel" disabled>
                 </label>
                 <label class="form-field" for="number_org">
                     <span>Адрес</span>
-                    <input type="text" id="address" name="address" placeholder="Введите адрес" required autocomplete="">
+                    <input type="text" id="address" name="address" placeholder="Введите адрес" required autocomplete="" disabled>
                 </label>
             </div>
         </div>
@@ -92,26 +94,41 @@
 </section>
 
 <script>
-    document.querySelectorAll('.role-option').forEach((button) => {
-    button.addEventListener('click', () => {
-        const selectedRole = button.dataset.role;
-        document.getElementById('selected_role').value = selectedRole;
+    const registerForm = document.getElementById('register_form');
+    const selectedRoleInput = document.getElementById('selected_role');
+
+    function setRegisterRole(selectedRole, shouldNotifyBackend = true) {
+        selectedRoleInput.value = selectedRole;
+        registerForm.action = `${registerForm.dataset.registerUrl}?state=${selectedRole}`;
 
         document.querySelectorAll('.role-option').forEach((item) => {
-            item.classList.remove('role-option-active');
-            item.setAttribute('aria-pressed', 'false');
+            const isActive = item.dataset.role === selectedRole;
+            item.classList.toggle('role-option-active', isActive);
+            item.setAttribute('aria-pressed', String(isActive));
         });
-
-        button.classList.add('role-option-active');
-        button.setAttribute('aria-pressed', 'true');
 
         document.querySelectorAll('.role-content').forEach((content) => {
-            content.classList.toggle(
-                'role-content-active',
-                content.dataset.content === selectedRole
-            );
+            const isActive = content.dataset.content === selectedRole;
+            content.classList.toggle('role-content-active', isActive);
+            content.querySelectorAll('input, textarea, select').forEach((field) => {
+                field.disabled = !isActive;
+            });
+        });
+
+        if (shouldNotifyBackend) {
+            fetch(`${registerForm.dataset.registerUrl}?state=${selectedRole}`, {
+                method: 'GET',
+                headers: {'X-Requested-With': 'fetch'}
+            });
+        }
+    }
+
+    document.querySelectorAll('.role-option').forEach((button) => {
+        button.addEventListener('click', () => {
+            setRegisterRole(button.dataset.role);
         });
     });
-});
+
+    setRegisterRole(selectedRoleInput.value, false);
 </script>
 {% endblock content %}
