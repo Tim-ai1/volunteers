@@ -520,26 +520,43 @@ main {
     transform: translateY(-2px);
 }
 #div-task {
-    width: 60vw;
-    align-content: center;
+    width: 100vw;
     justify-content: center;
+    text-align: center;
+    font-family: "Segoe UI", sans-serif;
+    margin-bottom: 5vh;
 }
 
 #div-task h2 {
     color: #129990;
-    font-family: "Segoe UI", sans-serif;
-    font-size: 20vh;
+    font-size: 3vh;
 }
 
 #div-task img {
-    width: 50vw;
+    width: 25vw;
     border-radius: 3vh;
+    margin: 3vh auto;
 }
 
-#div-task button {
-    border-radius: 5vh;
+#div-task a {
+    text-decoration: none;
+    border-radius: 2vh;
+    background-color: #90D1CA;
+    border-color: #90D1CA;
+    color: #ffffff;
+    font-size: 3vh;
+    font-weight: 450;
+    width: 16.5vw;
+    height: 6vh;
+    align-items: center;
+    display: block;
+    margin: 2vh auto;
 }
 
 #vol-events {
     color: #129990;
+    text-align: center;
+    font-size: 5vh;
+    margin: 30px;
+    font-weight: bold;
 }
