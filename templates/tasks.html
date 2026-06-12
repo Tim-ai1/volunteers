@@ -2,13 +2,16 @@
 
 {% block content %}
 <h1 id="vol-events">Мероприятия для волонтёров</h1>
-
-{% for task in tasks %}
 <div id="div-task">
-    <h2>{{ task.name }}</h2>
-    <img src="{{ url_for('static', filename=task.url_pic) }}" alt="Фотография не загружена">
-    <a href="#"><button>Принять участие</button></a>
-</div>
-{% endfor %}
+{% for task in tasks %}
 
+    <h2>{{ task.name }}</h2>
+    {% if task and task.url_pic %}
+        <img src="{{ url_for('static', filename=task.url_pic) }}" alt="Фотография не загружена">
+    {% else %}
+        <p>Фотография отсутствует</p>
+    {% endif %}
+    <a class="btn btn-primary" href="#">Принять участие</a>
+{% endfor %}
+</div>
 {% endblock %}
