@@ -279,7 +279,35 @@ def create_task():
 @app.route('/task/<int:id>', methods=['GET', 'POST'])
 def taskid(id):
     return render_template('task.html', task=task)
+@app.route('/profile/<int:user_id>')
+def profile(user_id):
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.id == user_id).first()
+    tasks = []
+    if user.role_id == 1:
+        tasks_ids = db_sess.query(UserTask.task_id).filter(UserTask.user_id == user_id).all()
+        for task_id in tasks_ids:
+            tasks.append(db_sess.query(Task).filter(Task.id == task_id[0]).first())
+    elif user.role_id == 2:
+        tasks = db_sess.query(Task).filter(Task.author_id == user_id).all()
+    return render_template('profile.html', user=user, tasks=tasks)
 
+
+@app.route('/admin_login', methods=['GET', 'POST'])
+def admin_login():
+    if current_user.is_authenticated:
+        if is_admin(current_user):
+            return redirect('/admin_panel')
+        else:
+            return 'отказано'
+    db_sess = db_session.create_session()
+    admin = db_sess.query(User).filter(User.role_id == 3).first()
+    form = AdminLoginForm()
+    if form.validate_on_submit():
+        if form.email.data == admin.email and admin.check_password(form.password.data):
+            login_user(admin, remember=form.remember_me.data)
+            return redirect('/admin_panel')
+    return render_template('login.html', form=form)
 
 if __name__ == '__main__':
     scheduler.init_app(app)
