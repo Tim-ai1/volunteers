@@ -20,6 +20,7 @@ body {
 body {
     margin: 0;
     font-family: "Segoe UI", sans-serif;
+    font-size: 16px;
     color: var(--text);
     background: linear-gradient(180deg, var(--white) 0%, rgba(144, 209, 202, 0.2) 100%);
 }
@@ -493,6 +494,18 @@ main {
     color: #129990;
     text-align: center;
 }
+
+.auth-error {
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: #7A1D1D;
+    background: #FFECEC;
+    border: 1px solid rgba(122, 29, 29, 0.16);
+    font-size: 14px;
+    font-weight: 700;
+}
+
 .auth_button
 {
     display: flex;
@@ -520,11 +533,11 @@ main {
     transform: translateY(-2px);
 }
 #div-task {
-    width: 100vw;
+    width: min(960px, calc(100% - 36px));
     justify-content: center;
     text-align: center;
     font-family: "Segoe UI", sans-serif;
-    margin-bottom: 5vh;
+    margin: 0 auto 5vh;
 }
 
 #div-task h2 {

@@ -9,6 +9,9 @@
         <div class="reg_label">
             <h2>Регистрация</h2>
         </div>
+        {% if error %}
+        <p class="auth-error">{{ error }}</p>
+        {% endif %}
         <div class="role-switch" aria-label="Выбор типа регистрации">
             <button class="role-option role-option-active" type="button" data-role="volunteer" aria-pressed="true">
                 Волонтёр
@@ -39,18 +42,18 @@
                 </label>
                 <label class="form-field" for="about_self">
                     <span>О себе</span>
-                    <textarea id="about_self" name="about_self" placeholder="Расскажите о себе" rows="5"
+                    <textarea id="about_self" name="info" placeholder="Расскажите о себе" rows="5"
                               required></textarea>
                 </label>
                 <label class="form-field" for="birthday">
                     <span>Дата рождения</span>
-                    <input type="date" id="birthday" name="birthday" placeholder="Введите дату рождения"
+                    <input type="date" id="birthday" name="birth_date" placeholder="Введите дату рождения"
                            autocomplete=""
                            required>
                 </label>
                 <label class="form-field" for="number">
                     <span>Телефон</span>
-                    <input type="number" id="number" name="number" placeholder="Введите номер телефона"
+                    <input type="tel" id="number" name="phone_number" placeholder="Введите номер телефона"
                            autocomplete="tel"
                            required>
                 </label>
@@ -65,22 +68,22 @@
                 </label>
                 <label class="form-field" for="email_org">
                     <span>Почта</span>
-                    <input type="text" id="email_org" name="email_org" placeholder="Введите почту" required
+                    <input type="text" id="email_org" name="email" placeholder="Введите почту" required
                            autocomplete="email" disabled>
                 </label>
                 <label class="form-field" for="password_org">
                     <span>Почта</span>
-                    <input type="password" id="password_org" name="password_org" placeholder="Введите пароль" required
+                    <input type="password" id="password_org" name="password" placeholder="Введите пароль" required
                            autocomplete="new-password" disabled>
                 </label>
                 <label class="form-field" for="about_org">
                     <span>Информация</span>
-                    <textarea id="about_org" name="about_org" placeholder="Расскажите об организации" rows="5"
+                    <textarea id="about_org" name="info" placeholder="Расскажите об организации" rows="5"
                               required disabled></textarea>
                 </label>
                 <label class="form-field" for="number_org">
                     <span>Телефон</span>
-                    <input type="number" id="number_org" name="number_org" placeholder="Введите номер телефона" required
+                    <input type="tel" id="number_org" name="phone_number" placeholder="Введите номер телефона" required
                            autocomplete="tel" disabled>
                 </label>
                 <label class="form-field" for="number_org">

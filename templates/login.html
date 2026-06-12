@@ -9,6 +9,9 @@
         <div class="reg_label">
             <h2>Вход</h2>
         </div>
+        {% if error %}
+        <p class="auth-error">{{ error }}</p>
+        {% endif %}
         <div class="role-content role-content-active" data-content="volunteer">
             <div class="volunteer-fields">
                 <label class="form-field" for="email">

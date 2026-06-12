@@ -73,7 +73,49 @@ def index():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    state = request.args.get('state')
+    if current_user.is_authenticated:
+        return 'вы уже зарегистрированы'
+    state = request.args.get('state') or request.form.get('role') or 'volunteer'
+    if request.method == 'GET':
+        return render_template('register.html')
+    if request.method == 'POST':
+        db_sess = db_session.create_session()
+        email = request.form.get('email', '').strip()
+        phone_number = request.form.get('phone_number', '').strip()
+        password = request.form.get('password', '')
+        info = request.form.get('info', '').strip()
+
+        if state == 'organization':
+            name = request.form.get('name', '').strip()
+            role_id = 2
+        else:
+            first_name = request.form.get('first_name', '').strip()
+            last_name = request.form.get('last_name', '').strip()
+            name = f'{first_name} {last_name}'.strip()
+            role_id = 1
+
+        if not name or not email or not phone_number or not password:
+            return render_template('register.html', error='Заполните все обязательные поля')
+        if db_sess.query(User).filter(User.email == email).first():
+            return render_template('register.html', error='Аккаунт с этой почтой уже существует')
+        if db_sess.query(User).filter(User.phone_number == phone_number).first():
+            return render_template('register.html', error='Аккаунт с этим номером телефона уже существует')
+        if db_sess.query(User).filter(User.name == name).first():
+            return render_template('register.html', error='Аккаунт с таким именем уже существует')
+
+        user = User(name=name, email=email, phone_number=phone_number, info=info, role_id=role_id)
+        user.set_password(password)
+        if state == 'organization':
+            user.address = request.form.get('address', '').strip()
+        else:
+            birth_date = request.form.get('birth_date')
+            if birth_date:
+                user.birth_date = datetime.date.fromisoformat(birth_date)
+
+        db_sess.add(user)
+        db_sess.commit()
+        login_user(user)
+        return redirect('/')
     if state == 'volunteer':
         form = UserRegisterForm()
         if form.validate_on_submit():
@@ -81,12 +123,12 @@ def register():
             if error:
                 return render_template('test.html', form=form)
             user_data = {
-                'name': form.name.data,
-                'email': form.email.data,
-                'phone_number': form.phone_number.data,
-                'birth_date': form.birth_date.data,
-                'info': form.info.data,
-                'role_id': 1,
+                'name':form.name.data,
+                'email':form.email.data,
+                'phone_number':form.phone_number.data,
+                'birth_date':form.birth_date.data,
+                'info':form.info.data,
+                'role_id':1,
                 'password': form.password.data
             }
             session['user_data'] = user_data
@@ -115,7 +157,7 @@ def register():
             code = '0' * (6 - len(code)) + code
             session['code'] = code
             return redirect("/verification")
-        return render_template('register.html', form=form)
+        return render_template('test.html', form=form)
     return render_template('register.html')
 
 
@@ -152,16 +194,17 @@ def verification():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return 'вы авторизованы'
-    form = LoginForm()
-    if form.validate_on_submit():
+        return redirect('/')
+    if request.method == 'POST':
         db_sess = db_session.create_session()
-        user = db_sess.query(User).filter(User.email == form.email.data).first()
-        if user.check_password(form.password.data):
-            login_user(user, remember=form.remember_me.data)
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
+        user = db_sess.query(User).filter(User.email == email).first()
+        if user and user.check_password(password):
+            login_user(user)
             return redirect('/')
-        return render_template('login.html', form=form, error='Неверный логин/пароль')
-    return render_template('login.html', form=form)
+        return render_template('login.html', error='Неверная почта или пароль')
+    return render_template('login.html')
 
 
 @app.route('/tasks')
