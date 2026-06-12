@@ -8,6 +8,7 @@ class Task(SqlAlchemyBase, SerializerMixin):
     __tablename__ = 'tasks'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
+    author_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('users.id'))
     name = sqlalchemy.Column(sqlalchemy.String)
     info = sqlalchemy.Column(sqlalchemy.String)
     address = sqlalchemy.Column(sqlalchemy.String)
@@ -16,5 +17,5 @@ class Task(SqlAlchemyBase, SerializerMixin):
     end_date = sqlalchemy.Column(sqlalchemy.DateTime)
     people_count = sqlalchemy.Column(sqlalchemy.Integer)
     tags = sqlalchemy.Column(sqlalchemy.String)
-    is_archived = sqlalchemy.Column(sqlalchemy.Boolean)
+    is_archived = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
     user_tasks = orm.relationship("UserTask", back_populates="task")
