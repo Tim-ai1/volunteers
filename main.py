@@ -68,6 +68,11 @@ def login():
     return render_template('login.html')
 
 
+@app.route('/task/<int:id>', methods=['GET', 'POST'])
+def taskid(id):
+    return render_template('task.html', task=task)
+
+
 if __name__ == '__main__':
     scheduler.init_app(app)
     scheduler.start()

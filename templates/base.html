@@ -16,6 +16,13 @@
         <a href="{{ url_for('login') }}" class="header-link header-login">Войти</a>
     </nav>
 </header>
+<section class="hero-banner">
+    <img src="{{ url_for('static', filename='images/banner.png') }}" alt="Главный баннер">
+    <div class="hero-overlay">
+        <div class="hero-title">Волонтёриум</div>
+        <p class="hero-subtitle">Платформа для волонтеров, организаторов и добрых дел</p>
+    </div>
+</section>
     {% block content %}
     {% endblock %}
 <footer id="main-footer">
