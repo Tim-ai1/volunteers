@@ -11,6 +11,7 @@ from data import db_session
 from data.tasks import Task
 from data.users import User
 from data.user_task import UserTask
+from forms.admin_login import AdminLoginForm
 from forms.login import LoginForm
 from forms.org_registration import OrgRegisterForm
 from forms.user_registration import UserRegisterForm
@@ -29,8 +30,9 @@ db_session.global_init("db/web-volunteers.db")
 # import sqlite3
 # with sqlite3.connect("db/web-volunteers.db") as conn:
 #     cursor = conn.cursor()
-#     cursor.execute("INSERT INTO roles (id, title) VALUES (1, 'Волонтёр'), (2, 'Организация')")
-#     conn.commit()
+    # cursor.execute("INSERT INTO roles (id, title) VALUES (1, 'Волонтёр'), (2, 'Организация')")
+    # cursor.execute("INSERT INTO roles (id, title) VALUES (3, 'Админ')")
+    # conn.commit()
 #
 # код для заполнения таблицы roles (запускается один раз)
 
@@ -54,6 +56,10 @@ def check_form(form):
     elif db_sess.query(User).filter(User.name == form.name.data).first():
         return 'Аккаунт с таким именем уже существует'
     return None
+
+
+def is_admin(user):
+    return user.role_id == 3
 
 
 @login_manager.user_loader
@@ -84,7 +90,7 @@ def register():
         if form.validate_on_submit():
             error = check_form(form)
             if error:
-                return render_template('test.html', form=form)
+                return render_template('register.html', form=form)
             user_data = {
                 'name':form.name.data,
                 'email':form.email.data,
@@ -99,13 +105,13 @@ def register():
             code = '0' * (6 - len(code)) + code
             session['code'] = code
             return redirect("/verification")
-        return render_template('test.html', form=form)
+        return render_template('register.html', form=form)
     elif state == 'organization':
         form = OrgRegisterForm()
         if form.validate_on_submit():
             error = check_form(form)
             if error:
-                return render_template('test.html', form=form)
+                return render_template('register.html', form=form)
             user_data = {
                 'name': form.name.data,
                 'email': form.email.data,
@@ -120,7 +126,7 @@ def register():
             code = '0' * (6 - len(code)) + code
             session['code'] = code
             return redirect("/verification")
-        return render_template('test.html', form=form)
+        return render_template('register.html', form=form)
 
 
 @app.route('/verification', methods=['GET', 'POST'])
@@ -130,7 +136,7 @@ def verification():
     print(code) # потом будет отправка на почту
     form = VerifForm()
     if request.method == 'GET':
-        return render_template('test2.html', form=form)
+        return render_template('verification.html', form=form)
     if form.validate_on_submit():
         if form.code.data == code:
             user = User(
@@ -183,6 +189,7 @@ def task(task_id):
 
 
 @app.route('/take_part/<int:task_id>')
+@login_required
 def take_part(task_id):
     db_sess = db_session.create_session()
     task = db_sess.query(Task).filter(Task.id == task_id).first()
@@ -202,6 +209,7 @@ def take_part(task_id):
 
 
 @app.route('/create_task', methods=['GET', 'POST'])
+@login_required
 def create_task():
     if current_user.role_id != 2:
         return 'отказано'
@@ -236,6 +244,36 @@ def create_task():
         return redirect('/')
     return render_template('create_task.html', form=form)
 
+
+@app.route('/profile/<int:user_id>')
+def profile(user_id):
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.id == user_id).first()
+    tasks = []
+    if user.role_id == 1:
+        tasks_ids = db_sess.query(UserTask.task_id).filter(UserTask.user_id == user_id).all()
+        for task_id in tasks_ids:
+            tasks.append(db_sess.query(Task).filter(Task.id == task_id[0]).first())
+    elif user.role_id == 2:
+        tasks = db_sess.query(Task).filter(Task.author_id == user_id).all()
+    return render_template('profile.html', user=user, tasks=tasks)
+
+
+@app.route('/admin_login', methods=['GET', 'POST'])
+def admin_login():
+    if current_user.is_authenticated:
+        if is_admin(current_user):
+            return redirect('/admin_panel')
+        else:
+            return 'отказано'
+    db_sess = db_session.create_session()
+    admin = db_sess.query(User).filter(User.role_id == 3).first()
+    form = AdminLoginForm()
+    if form.validate_on_submit():
+        if form.email.data == admin.email and admin.check_password(form.password.data):
+            login_user(admin, remember=form.remember_me.data)
+            return redirect('/admin_panel')
+    return render_template('login.html', form=form)
 
 
 if __name__ == '__main__':
