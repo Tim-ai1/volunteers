@@ -2,25 +2,26 @@
 
 {% block content %}
 <section class="auth-page">
-    <div class="auth-card">
-        <div class="role-switch" aria-label="Выбор типа входа">
-            <button class="role-option role-option-active" type="button" data-role="volunteer" aria-pressed="true">Волонтёр</button>
-            <button class="role-option" type="button" data-role="organization" aria-pressed="false">Организация</button>
+    <form class="auth-card" action="{{ url_for('login') }}" method="post">
+        <input type="hidden" name="role" id="selected_role" value="volunteer">
+        <div class="reg_label">
+            <h2>Вход</h2>
         </div>
-    </div>
+        <div class="role-content role-content-active" data-content="volunteer">
+            <div class="volunteer-fields">
+                <label class="form-field" for="email">
+                    <span>Почта</span>
+                    <input type="text" id="email" name="email" placeholder="Введите почту"
+                           autocomplete="email" required>
+                </label>
+                <label class="form-field" for="password">
+                    <span>Пароль</span>
+                    <input type="password" id="password" name="password" placeholder="Введите пароль"
+                           autocomplete="current-password" required>
+                </label>
+            </div>
+        </div>
+        <button class="auth_button" type="submit">Войти</button>
+    </form>
 </section>
-
-<script>
-    document.querySelectorAll('.role-option').forEach((button) => {
-        button.addEventListener('click', () => {
-            document.querySelectorAll('.role-option').forEach((item) => {
-                item.classList.remove('role-option-active');
-                item.setAttribute('aria-pressed', 'false');
-            });
-
-            button.classList.add('role-option-active');
-            button.setAttribute('aria-pressed', 'true');
-        });
-    });
-</script>
 {% endblock content %}

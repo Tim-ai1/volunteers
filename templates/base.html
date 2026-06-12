@@ -25,6 +25,7 @@
 </header>
     {% block content %}
     {% endblock %}
+{% if request.endpoint not in ['login', 'register'] %}
 <footer id="main-footer">
 <div>
     <h3>Почта</h3>
@@ -39,6 +40,7 @@
     <h4>ул. 40 лет Октября, 39, Липецк.</h4>
 </div>
 </footer>
+{% endif %}
 </main>
 </body>
 </html>
