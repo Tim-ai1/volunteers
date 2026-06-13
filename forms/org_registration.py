@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, SubmitField, EmailField, StringField
+from wtforms import PasswordField, SubmitField, EmailField, StringField, TextAreaField
 from wtforms.validators import DataRequired
 
 
@@ -9,6 +9,6 @@ class OrgRegisterForm(FlaskForm):
     password = PasswordField('Пароль', validators=[DataRequired()])
     password_again = PasswordField('Повторите пароль', validators=[DataRequired()])
     name = StringField('Название организации', validators=[DataRequired()])
-    info = StringField('Об организации')
+    info = TextAreaField('Об организации')
     address = StringField('Адрес')
     submit = SubmitField('Продолжить')

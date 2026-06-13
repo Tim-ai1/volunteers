@@ -85,26 +85,26 @@ def register():
     if current_user.is_authenticated:
         return 'вы уже зарегистрированы'
 
-    state = request.args.get('state')
+    state = request.args.get('state') or request.form.get('role')
     if not state or state not in ['volunteer', 'organization']:
         return redirect(url_for('register', state='volunteer'))
 
-    if state == 'volunteer':
-        form = VolunteerRegisterForm()
-    else:
-        form = OrgRegisterForm()
+    volunteer_form = VolunteerRegisterForm()
+    org_form = OrgRegisterForm()
+    form = org_form if state == 'organization' else volunteer_form
 
     if form.validate_on_submit():
         error = check_form(form)
         if error:
-            return render_template('register.html', form=form, error=error)
+            return render_template('register.html', volunteer_form=volunteer_form,
+                                   org_form=org_form, state=state, error=error)
 
         if state == 'volunteer':
             user_data = {
                 'name': form.name.data,
                 'email': form.email.data,
                 'phone_number': form.phone_number.data,
-                'birth_date': form.birth_date.data,
+                'birth_date': form.birth_date.data.isoformat(),
                 'info': form.info.data,
                 'role_id': 1,
                 'password': form.password.data
@@ -125,13 +125,16 @@ def register():
         session['code'] = code
         return redirect("/verification")
 
-    return render_template('register.html', form=form, error=None)
+    return render_template('register.html', volunteer_form=volunteer_form,
+                           org_form=org_form, state=state, error=None)
 
 
 @app.route('/verification', methods=['GET', 'POST'])
 def verification():
     user_data = session.get('user_data')
     code = session.get('code')
+    if not user_data or not code:
+        return redirect(url_for('register', state='volunteer'))
     print(code) # потом будет отправка на почту
     form = VerifForm()
     if request.method == 'GET':
@@ -149,8 +152,10 @@ def verification():
             if 'address' in user_data:
                 user.address = user_data['address']
             if 'birth_date' in user_data:
-                dt = parsedate_to_datetime(user_data['birth_date'])
-                user.birth_date = dt.date()
+                if isinstance(user_data['birth_date'], datetime.date):
+                    user.birth_date = user_data['birth_date']
+                else:
+                    user.birth_date = datetime.date.fromisoformat(user_data['birth_date'])
             db_sess = db_session.create_session()
             db_sess.add(user)
             db_sess.commit()
@@ -162,12 +167,12 @@ def verification():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return 'вы авторизованы'
+        return redirect('/')
     form = LoginForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.email == form.email.data).first()
-        if user.check_password(form.password.data):
+        if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect('/')
         return render_template('login.html', form=form, error='Неверный логин/пароль')
@@ -185,7 +190,23 @@ def tasks():
 def task(task_id):
     db_sess = db_session.create_session()
     task = db_sess.query(Task).filter(Task.id == task_id).first()
-    return render_template('task.html', task=task, role_id=current_user.role_id)
+    if not task:
+        return redirect('/tasks')
+    role_id = current_user.role_id if current_user.is_authenticated else None
+    description_lines = []
+    organizer = ''
+    organizer_phone = ''
+    for line in (task.info or '').splitlines():
+        if line.startswith('Организатор:'):
+            organizer = line.replace('Организатор:', '', 1).strip()
+        elif line.startswith('Телефон организатора:'):
+            organizer_phone = line.replace('Телефон организатора:', '', 1).strip()
+        else:
+            description_lines.append(line)
+    description = '\n'.join(description_lines).strip()
+    return render_template('task.html', task=task, role_id=role_id,
+                           description=description, organizer=organizer,
+                           organizer_phone=organizer_phone)
 
 
 @app.route('/take_part/<int:task_id>')
@@ -193,19 +214,19 @@ def task(task_id):
 def take_part(task_id):
     db_sess = db_session.create_session()
     task = db_sess.query(Task).filter(Task.id == task_id).first()
-    if current_user.role_id != 1 or task.is_archived == True:
-        return 'отказано'
+    if not task or current_user.role_id != 1 or task.is_archived == True:
+        return redirect(url_for('task', task_id=task_id))
     user_task = db_sess.query(UserTask).filter(UserTask.task_id == task_id,
                                                UserTask.user_id == current_user.id).first()
     if user_task:
-        return 'вы уже зарегистрированы на это событие'
+        return redirect(url_for('profile', user_id=current_user.id))
     user_task = UserTask(
         user_id=current_user.id,
         task_id=task_id
     )
     db_sess.add(user_task)
     db_sess.commit()
-    return 'готово'
+    return redirect(url_for('profile', user_id=current_user.id))
 
 
 @app.route('/create_task', methods=['GET', 'POST'])
@@ -215,15 +236,17 @@ def create_task():
         return 'отказано'
     form = CreateTaskForm()
     if form.validate_on_submit():
-        if form.start_date.data > form.end_date.data:
-            return render_template('create_task.html', form=form, error='Дата конца раньше даты начала')
+        organizer = request.form.get('organizer', '').strip()
+        organizer_phone = request.form.get('organizer_phone', '').strip()
+        task_info = form.info.data
+        if organizer or organizer_phone:
+            task_info = f'{task_info}\n\nОрганизатор: {organizer}\nТелефон организатора: {organizer_phone}'
         task = Task(
-            author_id=current_user.id,
             name=form.name.data,
-            info=form.info.data,
+            info=task_info,
             url_pic=None,
             start_date=form.start_date.data,
-            end_date=form.end_date.data,
+            end_date=form.start_date.data,
             address=form.address.data,
             people_count=form.people_count.data,
             tags=form.tags.data
@@ -233,30 +256,34 @@ def create_task():
         db_sess.commit()
         if form.files.data and form.files.data[0].filename:
             files = []
-            os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'tasks', str(task.id)))
+            os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'tasks', str(task.id)), exist_ok=True)
             for f in form.files.data:
                 filename = secure_filename(f.filename)
                 path = os.path.join(app.config['UPLOAD_FOLDER'], 'tasks', str(task.id), filename)
                 f.save(path)
-                files.append(filename)
+                files.append(f'upload/tasks/{task.id}/{filename}')
             task.url_pic = ','.join(files)
             db_sess.commit()
-        return redirect('/')
+        return redirect('/tasks')
     return render_template('create_task.html', form=form)
 
 
-# @app.route('/profile/<int:user_id>')
-# def profile(user_id):
-#     db_sess = db_session.create_session()
-#     user = db_sess.query(User).filter(User.id == user_id).first()
-#     tasks = []
-#     if user.role_id == 1:
-#         tasks_ids = db_sess.query(UserTask.task_id).filter(UserTask.user_id == user_id).all()
-#         for task_id in tasks_ids:
-#             tasks.append(db_sess.query(Task).filter(Task.id == task_id[0]).first())
-#     elif user.role_id == 2:
-#         tasks = db_sess.query(Task).filter(Task.author_id == user_id).all()
-#     return render_template('profile.html', user=user, tasks=tasks)
+@app.route('/profile/<int:user_id>')
+def profile(user_id):
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.id == user_id).first()
+    if not user:
+        return redirect('/')
+    tasks = []
+    if user.role_id == 1:
+        tasks_ids = db_sess.query(UserTask.task_id).filter(UserTask.user_id == user_id).all()
+        for task_id in tasks_ids:
+            task = db_sess.query(Task).filter(Task.id == task_id[0]).first()
+            if task:
+                tasks.append(task)
+    elif user.role_id == 2:
+        tasks = db_sess.query(Task).filter(Task.is_archived == False).all()
+    return render_template('profile.html', user=user, tasks=tasks)
 
 
 @app.route('/admin_login', methods=['GET', 'POST'])
@@ -282,7 +309,7 @@ def admin_panel():
     if current_user.role_id != 3:
         return 'отказано'
     db_sess = db_session.create_session()
-    tasks = db_sess.query(Task).filter(Task.is_accepted == 0).all()
+    tasks = db_sess.query(Task).filter(Task.is_archived == False).all()
     return render_template('admin_panel.html', tasks=tasks)
 
 
@@ -298,11 +325,6 @@ def accept_task(task_id):
     if not task:
         return 'Задание не найдено', 404
 
-    if task.is_accepted == 1:
-        return 'Задание уже одобрено', 400
-
-    task.is_accepted = 1
-    db_sess.commit()
     return redirect(url_for('admin_panel'))
 
 
@@ -315,7 +337,7 @@ def delete_task(task_id):
     if not task:
         return 'Задание не найдено', 404
 
-    if current_user.role_id != 3 and task.author_id != current_user.id:
+    if current_user.role_id != 3 and current_user.role_id != 2:
         return 'Доступ запрещен. Только автор или администратор могут удалить задание.', 403
 
     db_sess.query(UserTask).filter(UserTask.task_id == task_id).delete()
@@ -333,4 +355,4 @@ def delete_task(task_id):
 if __name__ == '__main__':
     scheduler.init_app(app)
     scheduler.start()
-    app.run()
+    app.run(host='127.0.0.1', port=5001, debug=True)

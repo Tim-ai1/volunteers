@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, SubmitField, EmailField, StringField
+from wtforms import PasswordField, SubmitField, EmailField, StringField, TextAreaField
 from wtforms.fields.datetime import DateField
 from wtforms.fields.simple import TelField
 from wtforms.validators import DataRequired
@@ -12,5 +12,5 @@ class VolunteerRegisterForm(FlaskForm):
     password_again = PasswordField('Повторите пароль', validators=[DataRequired()])
     name = StringField('Имя', validators=[DataRequired()])
     birth_date = DateField('Дата рождения', format='%Y-%m-%d', validators=[DataRequired()])
-    info = StringField('О себе')
+    info = TextAreaField('О себе')
     submit = SubmitField('Продолжить')
