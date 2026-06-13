@@ -504,6 +504,28 @@ main {
     height: 17px;
     accent-color: #096B68;
 }
+
+.verification-card {
+    text-align: center;
+}
+
+.verification-text {
+    margin: 0 0 18px;
+    color: rgba(8, 63, 61, 0.72);
+    font-size: 15px;
+    line-height: 1.45;
+}
+
+.verification-code-field {
+    text-align: left;
+}
+
+.verification-code-field input {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 8px;
+}
 .reg_label h2
 {
     color: #129990;
