@@ -11,6 +11,7 @@ from data import db_session
 from data.tasks import Task
 from data.users import User
 from data.user_task import UserTask
+from forms.admin_login import AdminLoginForm
 from forms.login import LoginForm
 from forms.org_registration import OrgRegisterForm
 from forms.user_registration import UserRegisterForm
@@ -221,42 +222,62 @@ def tasks():
 def task(task_id):
     db_sess = db_session.create_session()
     task = db_sess.query(Task).filter(Task.id == task_id).first()
-    return render_template('task.html', task=task, role_id=current_user.role_id)
+    if not task:
+        return redirect('/tasks')
+    role_id = current_user.role_id if current_user.is_authenticated else None
+    description_lines = []
+    organizer = ''
+    organizer_phone = ''
+    for line in (task.info or '').splitlines():
+        if line.startswith('Организатор:'):
+            organizer = line.replace('Организатор:', '', 1).strip()
+        elif line.startswith('Телефон организатора:'):
+            organizer_phone = line.replace('Телефон организатора:', '', 1).strip()
+        else:
+            description_lines.append(line)
+    description = '\n'.join(description_lines).strip()
+    return render_template('task.html', task=task, role_id=role_id,
+                           description=description, organizer=organizer,
+                           organizer_phone=organizer_phone)
 
 
 @app.route('/take_part/<int:task_id>')
+@login_required
 def take_part(task_id):
     db_sess = db_session.create_session()
     task = db_sess.query(Task).filter(Task.id == task_id).first()
-    if current_user.role_id != 1 or task.is_archived == True:
-        return 'отказано'
+    if not task or current_user.role_id != 1 or task.is_archived == True:
+        return redirect(url_for('task', task_id=task_id))
     user_task = db_sess.query(UserTask).filter(UserTask.task_id == task_id,
                                                UserTask.user_id == current_user.id).first()
     if user_task:
-        return 'вы уже зарегистрированы на это событие'
+        return redirect(url_for('task', task_id=task_id))
     user_task = UserTask(
         user_id=current_user.id,
         task_id=task_id
     )
     db_sess.add(user_task)
     db_sess.commit()
-    return 'готово'
+    return redirect(url_for('task', task_id=task_id))
 
 @app.route('/create_task', methods=['GET', 'POST'])
+@login_required
 def create_task():
     if current_user.role_id != 2:
         return 'отказано'
     form = CreateTaskForm()
     if form.validate_on_submit():
-        if form.start_date.data > form.end_date.data:
-            return render_template('create_task.html', form=form, error='Дата конца раньше даты начала')
+        organizer = request.form.get('organizer', '').strip()
+        organizer_phone = request.form.get('organizer_phone', '').strip()
+        task_info = form.info.data
+        if organizer or organizer_phone:
+            task_info = f'{task_info}\n\nОрганизатор: {organizer}\nТелефон организатора: {organizer_phone}'
         task = Task(
-            author_id=current_user.id,
             name=form.name.data,
-            info=form.info.data,
+            info=task_info,
             url_pic=None,
             start_date=form.start_date.data,
-            end_date=form.end_date.data,
+            end_date=form.start_date.data,
             address=form.address.data,
             people_count=form.people_count.data,
             tags=form.tags.data
@@ -266,19 +287,16 @@ def create_task():
         db_sess.commit()
         if form.files.data and form.files.data[0].filename:
             files = []
-            os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'tasks', str(task.id)))
+            os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'tasks', str(task.id)), exist_ok=True)
             for f in form.files.data:
                 filename = secure_filename(f.filename)
                 path = os.path.join(app.config['UPLOAD_FOLDER'], 'tasks', str(task.id), filename)
                 f.save(path)
-                files.append(filename)
+                files.append(f'upload/tasks/{task.id}/{filename}')
             task.url_pic = ','.join(files)
             db_sess.commit()
-        return redirect('/')
+        return redirect('/tasks')
     return render_template('create_task.html', form=form)
-@app.route('/task/<int:id>', methods=['GET', 'POST'])
-def taskid(id):
-    return render_template('task.html', task=task)
 @app.route('/profile/<int:user_id>')
 def profile(user_id):
     db_sess = db_session.create_session()
@@ -289,7 +307,7 @@ def profile(user_id):
         for task_id in tasks_ids:
             tasks.append(db_sess.query(Task).filter(Task.id == task_id[0]).first())
     elif user.role_id == 2:
-        tasks = db_sess.query(Task).filter(Task.author_id == user_id).all()
+        tasks = db_sess.query(Task).filter(Task.is_archived == False).all()
     return render_template('profile.html', user=user, tasks=tasks)
 
 

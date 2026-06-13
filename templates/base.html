@@ -11,7 +11,7 @@
 <main>
 <header class="site-header">
     <a href="{{ url_for('index') }}" class="site-logo">Волонтёриум</a>
-    <img src='static/images/img.png' alt="несмешная картинка" class="logo">
+    <img src="{{ url_for('static', filename='images/img.png') }}" alt="несмешная картинка" class="logo">
     {% if request.endpoint not in ['login', 'register'] %}
     <nav class="header-actions" aria-label="Основная навигация">
         {% if current_user.is_authenticated %}

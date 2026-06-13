@@ -1,19 +1,49 @@
-{% extends "./base.html" %}
+{% extends "base.html" %}
 
 {% block hero %}{% endblock %}
 
 {% block content %}
-<h1 id="vol-events">Мероприятия для волонтёров</h1>
-<div id="div-task">
-{% for task in tasks %}
+<section class="tasks-page">
+    <div class="tasks-head">
+        <h1 id="vol-events">Мероприятия</h1>
+        {% if current_user.is_authenticated and current_user.role_id == 2 %}
+            <a class="auth_button tasks-create-link" href="{{ url_for('create_task') }}">Добавить мероприятие</a>
+        {% endif %}
+    </div>
 
-    <h2>{{ task.name }}</h2>
-    {% if task and task.url_pic %}
-        <img src="{{ url_for('static', filename=task.url_pic) }}" alt="Фотография не загружена">
+    {% if tasks %}
+        <div id="div-task" class="tasks-grid">
+            {% for task in tasks %}
+                <article class="task-card">
+                    <h2>{{ task.name }}</h2>
+                    <a href="{{ url_for('task', task_id=task.id) }}" class="task-image-link">
+                        {% if task.url_pic %}
+                            <img src="{{ url_for('static', filename=task.url_pic.split(',')[0]) }}" alt="Фото мероприятия">
+                        {% else %}
+                            <div class="task-image-placeholder">Мероприятие</div>
+                        {% endif %}
+                    </a>
+                    <div class="task-card-meta">
+                        <span>{{ task.start_date.strftime('%d.%m.%Y %H:%M') if task.start_date else 'Дата не указана' }}</span>
+                        <span>{{ task.address }}</span>
+                        <span>{{ task.tags }}</span>
+                        <span>{{ task.people_count }} мест</span>
+                    </div>
+                    <a class="task-action-link" href="{{ url_for('task', task_id=task.id) }}">
+                        {% if current_user.is_authenticated and current_user.role_id == 2 %}
+                            Подробнее
+                        {% else %}
+                            Принять участие
+                        {% endif %}
+                    </a>
+                    {% if not current_user.is_authenticated %}
+                        <p class="task-note">Сначала нужно зарегистрироваться на сайте</p>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        </div>
     {% else %}
-        <p>Фотография отсутствует</p>
+        <p class="tasks-empty">Пока мероприятий нет.</p>
     {% endif %}
-    <a class="btn btn-primary" href="#">Принять участие</a>
-{% endfor %}
-</div>
+</section>
 {% endblock %}
