@@ -4,94 +4,101 @@
 
 {% block content %}
 <section class="auth-page">
-    <form class="auth-card" id="register_form" action="{{ url_for('register', state='volunteer') }}" method="post" data-register-url="{{ url_for('register') }}">
-        <input type="hidden" name="role" id="selected_role" value="volunteer">
+    <form class="auth-card" id="register_form" action="{{ url_for('register', state=request.args.get('state', 'volunteer')) }}" method="post" data-register-url="{{ url_for('register') }}">
+        {{ form.hidden_tag() }}
+
+        <input type="hidden" name="role" id="selected_role" value="{{ request.args.get('state', 'volunteer') }}">
+
         <div class="reg_label">
             <h2>Регистрация</h2>
         </div>
+
         {% if error %}
         <p class="auth-error">{{ error }}</p>
         {% endif %}
+
         <div class="role-switch" aria-label="Выбор типа регистрации">
-            <button class="role-option role-option-active" type="button" data-role="volunteer" aria-pressed="true">
+            <button class="role-option {% if request.args.get('state') == 'volunteer' %}role-option-active{% endif %}" type="button" data-role="volunteer" aria-pressed="{% if request.args.get('state') == 'volunteer' %}true{% else %}false{% endif %}">
                 Волонтёр
             </button>
-            <button class="role-option" type="button" data-role="organization" aria-pressed="false">Организация</button>
+            <button class="role-option {% if request.args.get('state') == 'organization' %}role-option-active{% endif %}" type="button" data-role="organization" aria-pressed="{% if request.args.get('state') == 'organization' %}true{% else %}false{% endif %}">
+                Организация
+            </button>
         </div>
-        <div class="role-content role-content-active" data-content="volunteer">
+
+        <div class="role-content {% if request.args.get('state') == 'volunteer' %}role-content-active{% endif %}" data-content="volunteer">
             <div class="volunteer-fields">
-                <label class="form-field" for="first_name">
-                    <span>Имя</span>
-                    <input type="text" id="first_name" name="first_name" placeholder="Введите ваше имя"
-                           autocomplete="given-name" required>
-                </label>
-                <label class="form-field" for="last_name">
-                    <span>Фамилия</span>
-                    <input type="text" id="last_name" name="last_name" placeholder="Введите вашу фамилию"
-                           autocomplete="family-name" required>
+                <label class="form-field" for="name">
+                    {{ form.name.label }}
+                    {{ form.name(id="name", placeholder="Введите ваше имя", autocomplete="given-name", disabled=(request.args.get('state') != 'volunteer')) }}
                 </label>
                 <label class="form-field" for="email">
-                    <span>Почта</span>
-                    <input type="text" id="email" name="email" placeholder="Введите почту"
-                           autocomplete="email" required>
+                    {{ form.email.label }}
+                    {{ form.email(id="email", placeholder="Введите почту", autocomplete="email", disabled=(request.args.get('state') != 'volunteer')) }}
                 </label>
                 <label class="form-field" for="password">
-                    <span>Пароль</span>
-                    <input type="password" id="password" name="password" placeholder="Введите пароль"
-                           autocomplete="new-password" required>
+                    {{ form.password.label }}
+                    {{ form.password(id="password", placeholder="Введите пароль", autocomplete="new-password", disabled=(request.args.get('state') != 'volunteer')) }}
                 </label>
-                <label class="form-field" for="about_self">
-                    <span>О себе</span>
-                    <textarea id="about_self" name="info" placeholder="Расскажите о себе" rows="5"
-                              required></textarea>
+                <label class="form-field" for="password_again">
+                    {{ form.password_again.label }}
+                    {{ form.password_again(id="password_again", placeholder="Повторите пароль", autocomplete="new-password", disabled=(request.args.get('state') != 'volunteer')) }}
                 </label>
-                <label class="form-field" for="birthday">
-                    <span>Дата рождения</span>
-                    <input type="date" id="birthday" name="birth_date" placeholder="Введите дату рождения"
-                           autocomplete=""
-                           required>
+                <label class="form-field" for="info">
+                    {{ form.info.label }}
+                    {{ form.info(id="info", placeholder="Расскажите о себе", rows="5", disabled=(request.args.get('state') != 'volunteer')) }}
                 </label>
-                <label class="form-field" for="number">
-                    <span>Телефон</span>
-                    <input type="tel" id="number" name="phone_number" placeholder="Введите номер телефона"
-                           autocomplete="tel"
-                           required>
+
+                {% if form.birth_date %}
+                <label class="form-field" for="birth_date">
+                    {{ form.birth_date.label }}
+                    {{ form.birth_date(id="birth_date", type="date", disabled=(request.args.get('state') != 'volunteer')) }}
+                </label>
+                {% endif %}
+
+                <label class="form-field" for="phone_number">
+                    {{ form.phone_number.label }}
+                    {{ form.phone_number(id="phone_number", placeholder="Введите номер телефона", autocomplete="tel", disabled=(request.args.get('state') != 'volunteer')) }}
                 </label>
             </div>
         </div>
 
-        <div class="role-content" data-content="organization">
+        <div class="role-content {% if request.args.get('state') == 'organization' %}role-content-active{% endif %}" data-content="organization">
             <div class="volunteer-fields">
                 <label class="form-field" for="name_org">
-                    <span>Название организации</span>
-                    <input type="text" id="name_org" name="name" placeholder="Введите название организации" required disabled>
+                    {{ form.name.label }}
+                    {{ form.name(id="name_org", placeholder="Введите название организации", disabled=(request.args.get('state') != 'organization')) }}
                 </label>
                 <label class="form-field" for="email_org">
-                    <span>Почта</span>
-                    <input type="text" id="email_org" name="email" placeholder="Введите почту" required
-                           autocomplete="email" disabled>
+                    {{ form.email.label }}
+                    {{ form.email(id="email_org", placeholder="Введите почту", autocomplete="email", disabled=(request.args.get('state') != 'organization')) }}
                 </label>
                 <label class="form-field" for="password_org">
-                    <span>Пароль</span>
-                    <input type="password" id="password_org" name="password" placeholder="Введите пароль" required
-                           autocomplete="new-password" disabled>
+                    {{ form.password.label }}
+                    {{ form.password(id="password_org", placeholder="Введите пароль", autocomplete="new-password", disabled=(request.args.get('state') != 'organization')) }}
                 </label>
-                <label class="form-field" for="about_org">
-                    <span>Информация</span>
-                    <textarea id="about_org" name="info" placeholder="Расскажите об организации" rows="5"
-                              required disabled></textarea>
+                <label class="form-field" for="password_org_again">
+                    {{ form.password_again.label }}
+                    {{ form.password_again(id="password_org_again", placeholder="Повторите пароль", autocomplete="new-password", disabled=(request.args.get('state') != 'organization')) }}
                 </label>
-                <label class="form-field" for="number_org">
-                    <span>Телефон</span>
-                    <input type="tel" id="number_org" name="phone_number" placeholder="Введите номер телефона" required
-                           autocomplete="tel" disabled>
+                <label class="form-field" for="info_org">
+                    {{ form.info.label }}
+                    {{ form.info(id="info_org", placeholder="Расскажите об организации", rows="5", disabled=(request.args.get('state') != 'organization')) }}
                 </label>
-                <label class="form-field" for="number_org">
-                    <span>Адрес</span>
-                    <input type="text" id="address" name="address" placeholder="Введите адрес" required autocomplete="" disabled>
+                <label class="form-field" for="phone_number_org">
+                    {{ form.phone_number.label }}
+                    {{ form.phone_number(id="phone_number_org", placeholder="Введите номер телефона", autocomplete="tel", disabled=(request.args.get('state') != 'organization')) }}
                 </label>
+
+                {% if form.address %}
+                <label class="form-field" for="address">
+                    {{ form.address.label }}
+                    {{ form.address(id="address", placeholder="Введите адрес", disabled=(request.args.get('state') != 'organization')) }}
+                </label>
+                {% endif %}
             </div>
         </div>
+
         <button class="auth_button" type="submit">Зарегистрироваться</button>
     </form>
 </section>
@@ -102,6 +109,7 @@
 
     function setRegisterRole(selectedRole, shouldNotifyBackend = true) {
         selectedRoleInput.value = selectedRole;
+
         registerForm.action = `${registerForm.dataset.registerUrl}?state=${selectedRole}`;
 
         document.querySelectorAll('.role-option').forEach((item) => {
@@ -113,16 +121,17 @@
         document.querySelectorAll('.role-content').forEach((content) => {
             const isActive = content.dataset.content === selectedRole;
             content.classList.toggle('role-content-active', isActive);
+
             content.querySelectorAll('input, textarea, select').forEach((field) => {
-                field.disabled = !isActive;
+                if (field.type !== 'hidden') {
+                    field.disabled = !isActive;
+                }
             });
         });
 
         if (shouldNotifyBackend) {
-            fetch(`${registerForm.dataset.registerUrl}?state=${selectedRole}`, {
-                method: 'GET',
-                headers: {'X-Requested-With': 'fetch'}
-            });
+            const newUrl = `${window.location.pathname}?state=${selectedRole}`;
+            window.history.pushState({ path: newUrl }, '', newUrl);
         }
     }
 

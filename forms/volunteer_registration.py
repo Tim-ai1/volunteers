@@ -5,7 +5,7 @@ from wtforms.fields.simple import TelField
 from wtforms.validators import DataRequired
 
 
-class UserRegisterForm(FlaskForm):
+class VolunteerRegisterForm(FlaskForm):
     email = EmailField('Адрес электронной почты', validators=[DataRequired()])
     phone_number = TelField('Номер телефона', validators=[DataRequired()])
     password = PasswordField('Пароль', validators=[DataRequired()])

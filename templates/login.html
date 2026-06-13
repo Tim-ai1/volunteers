@@ -5,27 +5,45 @@
 {% block content %}
 <section class="auth-page">
     <form class="auth-card" action="{{ url_for('login') }}" method="post">
-        <input type="hidden" name="role" id="selected_role" value="volunteer">
+        {{ form.hidden_tag() }}
+
+        {% if admin %}
+        <div class="reg_label">
+            <h2>Вход для администратора</h2>
+        </div>
+        {% else %}
         <div class="reg_label">
             <h2>Вход</h2>
         </div>
+        {% endif %}
+
         {% if error %}
         <p class="auth-error">{{ error }}</p>
         {% endif %}
-        <div class="role-content role-content-active" data-content="volunteer">
+
+        <div class="role-content role-content-active">
             <div class="volunteer-fields">
+
                 <label class="form-field" for="email">
-                    <span>Почта</span>
-                    <input type="text" id="email" name="email" placeholder="Введите почту"
-                           autocomplete="email" required>
+                    <span>{{ form.email.label }}</span>
+                    {{ form.email(id="email", placeholder="Введите почту", autocomplete="email") }}
                 </label>
+
                 <label class="form-field" for="password">
-                    <span>Пароль</span>
-                    <input type="password" id="password" name="password" placeholder="Введите пароль"
-                           autocomplete="current-password" required>
+                    <span>{{ form.password.label }}</span>
+                    {{ form.password(id="password", placeholder="Введите пароль", autocomplete="current-password") }}
                 </label>
+
+                <div class="remember-me-container" style="display: flex; align-items: center; gap: 10px; margin-top: 15px;">
+                    {{ form.remember_me(id="remember_me") }}
+                    <label for="remember_me" style="cursor: pointer; font-size: 0.95rem; color: inherit;">
+                        {{ form.remember_me.label }}
+                    </label>
+                </div>
+
             </div>
         </div>
+
         <button class="auth_button" type="submit">Войти</button>
     </form>
 </section>
