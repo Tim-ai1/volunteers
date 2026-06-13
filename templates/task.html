@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block hero %}{% endblock %}
+
+{% block content %}
+<section class="task-detail">
+    <h1>{{ task.name }}</h1>
+
+    <div class="task-detail-grid">
+        <div class="task-detail-info">
+            <p><strong>Название:</strong> {{ task.name }}</p>
+            <p><strong>Дата:</strong> {{ task.start_date.strftime('%d.%m.%Y %H:%M') if task.start_date else 'Не указана' }}</p>
+            {% if organizer %}
+                <p><strong>Организатор:</strong> {{ organizer }}</p>
+            {% endif %}
+            {% if organizer_phone %}
+                <p><strong>Телефон организатора:</strong> {{ organizer_phone }}</p>
+            {% endif %}
+            <p><strong>Локация:</strong> {{ task.address }}</p>
+            <p><strong>Направление:</strong> {{ task.tags }}</p>
+            <p><strong>Мест:</strong> {{ task.people_count }}</p>
+            <p><strong>Фото:</strong> {% if task.url_pic %}Загружено{% else %}Не загружено{% endif %}</p>
+            <p class="task-description"><strong>Описание:</strong> {{ description or 'Описание не указано' }}</p>
+        </div>
+
+        <div class="task-detail-media">
+            {% if task.url_pic %}
+                <img src="{{ url_for('static', filename=task.url_pic.split(',')[0]) }}" alt="Фото мероприятия">
+            {% else %}
+                <div class="task-image-placeholder task-detail-placeholder">Мероприятие</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="task-detail-actions">
+        {% if current_user.is_authenticated and current_user.role_id == 1 %}
+            <a class="task-action-link task-detail-button" href="{{ url_for('take_part', task_id=task.id) }}">Принять участие</a>
+        {% elif current_user.is_authenticated and current_user.role_id == 2 %}
+            <p class="task-note">Организатор может просматривать мероприятие, но не записывается на него.</p>
+        {% else %}
+            <p class="task-note">Чтобы принять участие, сначала зарегистрируйтесь или войдите.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

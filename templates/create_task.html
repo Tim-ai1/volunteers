@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block hero %}{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+    <form class="auth-card" action="{{ url_for('create_task') }}" method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="reg_label">
+            <h2>Добавить мероприятие</h2>
+        </div>
+        {% if error %}
+        <p class="auth-error">{{ error }}</p>
+        {% endif %}
+        <div class="volunteer-fields">
+            <label class="form-field" for="organizer">
+                <span>Организатор</span>
+                <input type="text" id="organizer" name="organizer" placeholder="Название организатора" value="{{ current_user.name }}" required>
+            </label>
+            <label class="form-field" for="organizer_phone">
+                <span>Телефон организатора</span>
+                <input type="tel" id="organizer_phone" name="organizer_phone" placeholder="Введите телефон организатора" value="{{ current_user.phone_number or '' }}" required>
+            </label>
+            <label class="form-field">
+                <span>{{ form.name.label.text }}</span>
+                {{ form.name(placeholder="Название мероприятия") }}
+            </label>
+            <label class="form-field">
+                <span>{{ form.info.label.text }}</span>
+                {{ form.info(placeholder="Описание мероприятия", rows="5") }}
+            </label>
+            <label class="form-field">
+                <span>{{ form.start_date.label.text }}</span>
+                {{ form.start_date() }}
+            </label>
+            <label class="form-field">
+                <span>{{ form.address.label.text }}</span>
+                {{ form.address(placeholder="Адрес") }}
+            </label>
+            <label class="form-field">
+                <span>{{ form.people_count.label.text }}</span>
+                {{ form.people_count(placeholder="Количество волонтёров") }}
+            </label>
+            <label class="form-field">
+                <span>{{ form.tags.label.text }}</span>
+                {{ form.tags(placeholder="Например: помощь, город, дети") }}
+            </label>
+            <label class="form-field">
+                <span>{{ form.files.label.text }}</span>
+                {{ form.files() }}
+            </label>
+        </div>
+        <button class="auth_button" type="submit">Создать мероприятие</button>
+    </form>
+</section>
+{% endblock %}
