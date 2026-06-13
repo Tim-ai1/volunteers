@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block hero %}{% endblock %}
+
+{% block content %}
+<section class="profile-page">
+    <div class="profile-shell">
+        <div class="profile-main">
+            <section class="profile-events">
+                <h2>Активные мероприятия</h2>
+                <div class="profile-event-list">
+                    {% set active_count = namespace(value=0) %}
+                    {% for task in tasks %}
+                        {% if task and not task.is_archived %}
+                            {% set active_count.value = active_count.value + 1 %}
+                            <a class="profile-event-card" href="{{ url_for('task', task_id=task.id) }}">
+                                {% if task.url_pic %}
+                                    <img src="{{ url_for('static', filename=task.url_pic.split(',')[0]) }}" alt="Фото мероприятия">
+                                {% else %}
+                                    <span class="profile-event-placeholder"></span>
+                                {% endif %}
+                                <span>
+                                    <strong>{{ task.name }}</strong>
+                                    <small>{{ task.start_date.strftime('%d.%m.%Y %H:%M') if task.start_date else 'Дата не указана' }}</small>
+                                </span>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                    {% if active_count.value == 0 %}
+                        <p class="profile-empty">Пока активных мероприятий нет.</p>
+                    {% endif %}
+                </div>
+
+                <h2>Архивные мероприятия</h2>
+                <div class="profile-event-list">
+                    {% set archive_count = namespace(value=0) %}
+                    {% for task in tasks %}
+                        {% if task and task.is_archived %}
+                            {% set archive_count.value = archive_count.value + 1 %}
+                            <a class="profile-event-card profile-event-card-muted" href="{{ url_for('task', task_id=task.id) }}">
+                                {% if task.url_pic %}
+                                    <img src="{{ url_for('static', filename=task.url_pic.split(',')[0]) }}" alt="Фото мероприятия">
+                                {% else %}
+                                    <span class="profile-event-placeholder"></span>
+                                {% endif %}
+                                <span>
+                                    <strong>{{ task.name }}</strong>
+                                    <small>{{ task.start_date.strftime('%d.%m.%Y %H:%M') if task.start_date else 'Дата не указана' }}</small>
+                                </span>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                    {% if archive_count.value == 0 %}
+                        <p class="profile-empty">Архивных мероприятий пока нет.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <aside class="profile-data-card">
+                <h2>Персональные данные</h2>
+
+                {% if user.role_id == 2 %}
+                    <p><strong>Название:</strong> {{ user.name or 'Не указано' }}</p>
+                    <p><strong>Почта:</strong> {{ user.email or 'Не указана' }}</p>
+                    <p><strong>Адрес:</strong> {{ user.address or 'Не указан' }}</p>
+                    <p><strong>Телефон:</strong> {{ user.phone_number or 'Не указан' }}</p>
+                    <p><strong>Об организации:</strong> {{ user.info or 'Не указано' }}</p>
+                {% else %}
+                    {% set name_parts = (user.name or '').split(' ', 1) %}
+                    <p><strong>Имя:</strong> {{ name_parts[0] if name_parts and name_parts[0] else 'Не указано' }}</p>
+                    <p><strong>Фамилия:</strong> {{ name_parts[1] if name_parts|length > 1 else 'Не указана' }}</p>
+                    <p><strong>Почта:</strong> {{ user.email or 'Не указана' }}</p>
+                    <p><strong>О себе:</strong> {{ user.info or 'Не указано' }}</p>
+                    <p><strong>Дата рождения:</strong> {{ user.birth_date.strftime('%d.%m.%Y') if user.birth_date else 'Не указана' }}</p>
+                    <p><strong>Телефон:</strong> {{ user.phone_number or 'Не указан' }}</p>
+                {% endif %}
+            </aside>
+        </div>
+    </div>
+</section>
+{% endblock %}
