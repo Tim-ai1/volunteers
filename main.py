@@ -182,7 +182,8 @@ def login():
 @app.route('/tasks')
 def tasks():
     db_sess = db_session.create_session()
-    tasks = db_sess.query(Task).filter(Task.is_archived == False).all()
+    tasks = db_sess.query(Task).filter(Task.is_archived == False,
+                                       Task.is_accepted == True).all()
     return render_template('tasks.html', tasks=tasks)
 
 
@@ -214,7 +215,8 @@ def task(task_id):
 def take_part(task_id):
     db_sess = db_session.create_session()
     task = db_sess.query(Task).filter(Task.id == task_id).first()
-    if not task or current_user.role_id != 1 or task.is_archived == True:
+    if (not task or current_user.role_id != 1 or task.is_archived == True
+            or task.is_accepted != True):
         return redirect(url_for('task', task_id=task_id))
     user_task = db_sess.query(UserTask).filter(UserTask.task_id == task_id,
                                                UserTask.user_id == current_user.id).first()
@@ -242,6 +244,7 @@ def create_task():
         if organizer or organizer_phone:
             task_info = f'{task_info}\n\nОрганизатор: {organizer}\nТелефон организатора: {organizer_phone}'
         task = Task(
+            author_id=current_user.id,
             name=form.name.data,
             info=task_info,
             url_pic=None,
@@ -249,7 +252,8 @@ def create_task():
             end_date=form.start_date.data,
             address=form.address.data,
             people_count=form.people_count.data,
-            tags=form.tags.data
+            tags=form.tags.data,
+            is_accepted=False
         )
         db_sess = db_session.create_session()
         db_sess.add(task)
@@ -264,7 +268,7 @@ def create_task():
                 files.append(f'upload/tasks/{task.id}/{filename}')
             task.url_pic = ','.join(files)
             db_sess.commit()
-        return redirect('/tasks')
+        return redirect(url_for('profile', user_id=current_user.id))
     return render_template('create_task.html', form=form)
 
 
@@ -282,7 +286,7 @@ def profile(user_id):
             if task:
                 tasks.append(task)
     elif user.role_id == 2:
-        tasks = db_sess.query(Task).filter(Task.is_archived == False).all()
+        tasks = db_sess.query(Task).filter(Task.author_id == user_id).all()
     return render_template('profile.html', user=user, tasks=tasks)
 
 
@@ -309,7 +313,8 @@ def admin_panel():
     if current_user.role_id != 3:
         return 'отказано'
     db_sess = db_session.create_session()
-    tasks = db_sess.query(Task).filter(Task.is_archived == False).all()
+    tasks = db_sess.query(Task).filter(Task.is_archived == False,
+                                       Task.is_accepted == False).all()
     return render_template('admin_panel.html', tasks=tasks)
 
 
@@ -325,6 +330,11 @@ def accept_task(task_id):
     if not task:
         return 'Задание не найдено', 404
 
+    if task.is_accepted == True:
+        return 'Задание уже одобрено', 400
+
+    task.is_accepted = True
+    db_sess.commit()
     return redirect(url_for('admin_panel'))
 
 
@@ -337,7 +347,7 @@ def delete_task(task_id):
     if not task:
         return 'Задание не найдено', 404
 
-    if current_user.role_id != 3 and current_user.role_id != 2:
+    if current_user.role_id != 3 and task.author_id != current_user.id:
         return 'Доступ запрещен. Только автор или администратор могут удалить задание.', 403
 
     db_sess.query(UserTask).filter(UserTask.task_id == task_id).delete()

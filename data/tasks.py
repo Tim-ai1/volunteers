@@ -17,4 +17,6 @@ class Task(SqlAlchemyBase, SerializerMixin):
     people_count = sqlalchemy.Column(sqlalchemy.Integer)
     tags = sqlalchemy.Column(sqlalchemy.String)
     is_archived = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
+    author_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('users.id'))
+    is_accepted = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
     user_tasks = orm.relationship("UserTask", back_populates="task")

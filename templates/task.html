@@ -33,8 +33,10 @@
     </div>
 
     <div class="task-detail-actions">
-        {% if current_user.is_authenticated and current_user.role_id == 1 %}
+        {% if current_user.is_authenticated and current_user.role_id == 1 and task.is_accepted %}
             <a class="task-action-link task-detail-button" href="{{ url_for('take_part', task_id=task.id) }}">Принять участие</a>
+        {% elif current_user.is_authenticated and current_user.role_id == 1 %}
+            <p class="task-note">Мероприятие пока ожидает подтверждения администратором.</p>
         {% elif current_user.is_authenticated and current_user.role_id == 2 %}
             <p class="task-note">Организатор может просматривать мероприятие, но не записывается на него.</p>
         {% else %}
