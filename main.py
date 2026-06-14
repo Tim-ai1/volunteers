@@ -4,6 +4,7 @@ from email.utils import parsedate_to_datetime
 import random
 import os
 import emails
+import shutil
 from werkzeug.utils import secure_filename
 from flask_apscheduler import APScheduler
 from flask_login import LoginManager, login_required, logout_user, login_user, current_user
@@ -19,6 +20,7 @@ from forms.volunteer_registration import VolunteerRegisterForm
 from forms.verification import VerifForm
 from forms.create_task import CreateTaskForm
 from dotenv import load_dotenv
+from waitress import serve
 
 load_dotenv()
 app = Flask(__name__)
@@ -168,7 +170,8 @@ def verification():
                 info=user_data['info'],
                 role_id=user_data['role_id']
             )
-            session.clear()
+            session.pop('user_data', None)
+            session.pop('code', None)
             user.set_password(user_data['password'])
             if 'address' in user_data:
                 user.address = user_data['address']
@@ -209,7 +212,6 @@ def tasks():
 def task(task_id):
     db_sess = db_session.create_session()
     task = db_sess.query(Task).filter(Task.id == task_id).first()
-    db_sess = db_session.create_session()
     org = db_sess.query(User).filter(User.id == task.author_id).first()
     users = db_sess.query(UserTask.user_id).filter(UserTask.task_id == task_id).all()
     return render_template('task.html', task=task, org=org, users=users)
@@ -260,7 +262,7 @@ def create_task():
         db_sess.commit()
         if form.files.data and form.files.data[0].filename:
             files = []
-            os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'tasks', str(task.id)))
+            os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'tasks', str(task.id)), exist_ok=True)
             for f in form.files.data:
                 filename = secure_filename(f.filename)
                 path = os.path.join(app.config['UPLOAD_FOLDER'], 'tasks', str(task.id), filename)
@@ -346,6 +348,9 @@ def delete_task(task_id):
     if current_user.role_id != 3 and task.author_id != current_user.id:
         return 'Доступ запрещен. Только автор или администратор могут удалить задание.', 403
 
+    if os.path.isdir(os.path.join(app.config['UPLOAD_FOLDER'], 'tasks', str(task.id))):
+        shutil.rmtree(os.path.join(app.config['UPLOAD_FOLDER'], 'tasks', str(task.id)))
+
     db_sess.query(UserTask).filter(UserTask.task_id == task_id).delete()
 
     db_sess.delete(task)
@@ -369,8 +374,6 @@ def finish_task(task_id):
         return jsonify({'success': False, 'message': 'Это не ваше мероприятие'}), 403
 
     task.is_archived = True
-
-    task.is_archived = True
     db_sess.commit()
 
     return jsonify({'success': True, 'message': 'Мероприятие успешно завершено'})
@@ -379,4 +382,4 @@ def finish_task(task_id):
 if __name__ == '__main__':
     scheduler.init_app(app)
     scheduler.start()
-    app.run()
+    serve(app, host='0.0.0.0', port=5000)
