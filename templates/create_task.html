@@ -13,14 +13,6 @@
         <p class="auth-error">{{ error }}</p>
         {% endif %}
         <div class="volunteer-fields">
-            <label class="form-field" for="organizer">
-                <span>Организатор</span>
-                <input type="text" id="organizer" name="organizer" placeholder="Название организатора" value="{{ current_user.name }}" required>
-            </label>
-            <label class="form-field" for="organizer_phone">
-                <span>Телефон организатора</span>
-                <input type="tel" id="organizer_phone" name="organizer_phone" placeholder="Введите телефон организатора" value="{{ current_user.phone_number or '' }}" required>
-            </label>
             <label class="form-field">
                 <span>{{ form.name.label.text }}</span>
                 {{ form.name(placeholder="Название мероприятия") }}
@@ -32,6 +24,10 @@
             <label class="form-field">
                 <span>{{ form.start_date.label.text }}</span>
                 {{ form.start_date() }}
+            </label>
+            <label class="form-field">
+                <span>{{ form.end_date.label.text }}</span>
+                {{ form.end_date() }}
             </label>
             <label class="form-field">
                 <span>{{ form.address.label.text }}</span>

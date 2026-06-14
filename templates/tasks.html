@@ -14,11 +14,12 @@
     {% if tasks %}
         <div id="div-task" class="tasks-grid">
             {% for task in tasks %}
+            {% if task.is_accepted %}
                 <article class="task-card">
                     <h2>{{ task.name }}</h2>
                     <a href="{{ url_for('task', task_id=task.id) }}" class="task-image-link">
                         {% if task.url_pic %}
-                            <img src="{{ url_for('static', filename=task.url_pic.split(',')[0]) }}" alt="Фото мероприятия">
+                            <img src="{{ url_for('static', filename='upload/tasks/' + task.id|string + '/' + task.url_pic.split(',')[0]) }}" alt="Фото мероприятия">
                         {% else %}
                             <div class="task-image-placeholder">Мероприятие</div>
                         {% endif %}
@@ -40,6 +41,7 @@
                         <p class="task-note">Сначала нужно зарегистрироваться на сайте</p>
                     {% endif %}
                 </article>
+            {% endif %}
             {% endfor %}
         </div>
     {% else %}

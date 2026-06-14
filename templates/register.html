@@ -4,8 +4,8 @@
 
 {% block content %}
 <section class="auth-page">
-    <form class="auth-card" id="register_form" action="{{ url_for('register', state=state or 'volunteer') }}" method="post" data-register-url="{{ url_for('register') }}">
-        {{ volunteer_form.hidden_tag() }}
+    <form class="auth-card" id="register_form" action="{{ url_for('register', state=state or 'volunteer') }}" method="post">
+        {{ form.hidden_tag() }}
         <input type="hidden" name="role" id="selected_role" value="{{ state or 'volunteer' }}">
 
         <div class="reg_label">
@@ -17,76 +17,76 @@
         {% endif %}
 
         <div class="role-switch" aria-label="Выбор типа регистрации">
-            <button class="role-option{% if (state or 'volunteer') == 'volunteer' %} role-option-active{% endif %}" type="button" data-role="volunteer" aria-pressed="{% if (state or 'volunteer') == 'volunteer' %}true{% else %}false{% endif %}">
+            <button class="role-option{% if (state or 'volunteer') == 'volunteer' %} role-option-active{% endif %}" type="button" data-role="volunteer">
                 Волонтёр
             </button>
-            <button class="role-option{% if state == 'organization' %} role-option-active{% endif %}" type="button" data-role="organization" aria-pressed="{% if state == 'organization' %}true{% else %}false{% endif %}">
+            <button class="role-option{% if state == 'organization' %} role-option-active{% endif %}" type="button" data-role="organization">
                 Организация
             </button>
         </div>
 
-        <div class="role-content{% if (state or 'volunteer') == 'volunteer' %} role-content-active{% endif %}" data-content="volunteer">
+        <div id="volunteer-fields" class="role-content{% if (state or 'volunteer') == 'volunteer' %} role-content-active{% endif %}">
             <div class="volunteer-fields">
                 <label class="form-field" for="volunteer_name">
-                    <span>{{ volunteer_form.name.label.text }}</span>
-                    {{ volunteer_form.name(id="volunteer_name", placeholder="Введите ваше имя", autocomplete="given-name") }}
+                    <span>{{ form.name.label.text }}</span>
+                    <input type="text" id="volunteer_name" name="name" placeholder="Введите ваше имя" autocomplete="given-name" value="{{ form.name.data or '' }}">
                 </label>
                 <label class="form-field" for="volunteer_email">
-                    <span>{{ volunteer_form.email.label.text }}</span>
-                    {{ volunteer_form.email(id="volunteer_email", placeholder="Введите почту", autocomplete="email") }}
+                    <span>{{ form.email.label.text }}</span>
+                    <input type="email" id="volunteer_email" name="email" placeholder="Введите почту" autocomplete="email" value="{{ form.email.data or '' }}">
                 </label>
                 <label class="form-field" for="volunteer_password">
-                    <span>{{ volunteer_form.password.label.text }}</span>
-                    {{ volunteer_form.password(id="volunteer_password", placeholder="Введите пароль", autocomplete="new-password") }}
+                    <span>{{ form.password.label.text }}</span>
+                    <input type="password" id="volunteer_password" name="password" placeholder="Введите пароль" autocomplete="new-password">
                 </label>
                 <label class="form-field" for="volunteer_password_again">
-                    <span>{{ volunteer_form.password_again.label.text }}</span>
-                    {{ volunteer_form.password_again(id="volunteer_password_again", placeholder="Повторите пароль", autocomplete="new-password") }}
+                    <span>{{ form.password_again.label.text }}</span>
+                    <input type="password" id="volunteer_password_again" name="password_again" placeholder="Повторите пароль" autocomplete="new-password">
                 </label>
                 <label class="form-field" for="volunteer_info">
-                    <span>{{ volunteer_form.info.label.text }}</span>
-                    {{ volunteer_form.info(id="volunteer_info", placeholder="Расскажите о себе", rows="5") }}
+                    <span>{{ form.info.label.text }}</span>
+                    <textarea id="volunteer_info" name="info" placeholder="Расскажите о себе" rows="5">{{ form.info.data or '' }}</textarea>
                 </label>
                 <label class="form-field" for="volunteer_birth_date">
-                    <span>{{ volunteer_form.birth_date.label.text }}</span>
-                    {{ volunteer_form.birth_date(id="volunteer_birth_date") }}
+                    <span>{{ form.birth_date.label.text }}</span>
+                    <input type="date" id="volunteer_birth_date" name="birth_date" value="{{ form.birth_date.data or '' }}">
                 </label>
                 <label class="form-field" for="volunteer_phone_number">
-                    <span>{{ volunteer_form.phone_number.label.text }}</span>
-                    {{ volunteer_form.phone_number(id="volunteer_phone_number", placeholder="Введите номер телефона", autocomplete="tel") }}
+                    <span>{{ form.phone_number.label.text }}</span>
+                    <input type="tel" id="volunteer_phone_number" name="phone_number" placeholder="Введите номер телефона" autocomplete="tel" value="{{ form.phone_number.data or '' }}">
                 </label>
             </div>
         </div>
 
-        <div class="role-content{% if state == 'organization' %} role-content-active{% endif %}" data-content="organization">
+        <div id="organization-fields" class="role-content{% if state == 'organization' %} role-content-active{% endif %}">
             <div class="volunteer-fields">
                 <label class="form-field" for="org_name">
-                    <span>{{ org_form.name.label.text }}</span>
-                    {{ org_form.name(id="org_name", placeholder="Введите название организации") }}
+                    <span>{{ form.name.label.text }}</span>
+                    <input type="text" id="org_name" name="name" placeholder="Введите название организации" value="{{ form.name.data or '' }}">
                 </label>
                 <label class="form-field" for="org_email">
-                    <span>{{ org_form.email.label.text }}</span>
-                    {{ org_form.email(id="org_email", placeholder="Введите почту", autocomplete="email") }}
+                    <span>{{ form.email.label.text }}</span>
+                    <input type="email" id="org_email" name="email" placeholder="Введите почту" autocomplete="email" value="{{ form.email.data or '' }}">
                 </label>
                 <label class="form-field" for="org_password">
-                    <span>{{ org_form.password.label.text }}</span>
-                    {{ org_form.password(id="org_password", placeholder="Введите пароль", autocomplete="new-password") }}
+                    <span>{{ form.password.label.text }}</span>
+                    <input type="password" id="org_password" name="password" placeholder="Введите пароль" autocomplete="new-password">
                 </label>
                 <label class="form-field" for="org_password_again">
-                    <span>{{ org_form.password_again.label.text }}</span>
-                    {{ org_form.password_again(id="org_password_again", placeholder="Повторите пароль", autocomplete="new-password") }}
+                    <span>{{ form.password_again.label.text }}</span>
+                    <input type="password" id="org_password_again" name="password_again" placeholder="Повторите пароль" autocomplete="new-password">
                 </label>
                 <label class="form-field" for="org_info">
-                    <span>{{ org_form.info.label.text }}</span>
-                    {{ org_form.info(id="org_info", placeholder="Расскажите об организации", rows="5") }}
-                </label>
-                <label class="form-field" for="org_phone_number">
-                    <span>{{ org_form.phone_number.label.text }}</span>
-                    {{ org_form.phone_number(id="org_phone_number", placeholder="Введите номер телефона", autocomplete="tel") }}
+                    <span>{{ form.info.label.text }}</span>
+                    <textarea id="org_info" name="info" placeholder="Расскажите об организации" rows="5">{{ form.info.data or '' }}</textarea>
                 </label>
                 <label class="form-field" for="org_address">
-                    <span>{{ org_form.address.label.text }}</span>
-                    {{ org_form.address(id="org_address", placeholder="Введите адрес") }}
+                    <span>Адрес</span>
+                    <input type="text" id="org_address" name="address" placeholder="Введите адрес" value="{{ form.address.data or '' if form.address else '' }}">
+                </label>
+                <label class="form-field" for="org_phone_number">
+                    <span>{{ form.phone_number.label.text }}</span>
+                    <input type="tel" id="org_phone_number" name="phone_number" placeholder="Введите номер телефона" autocomplete="tel" value="{{ form.phone_number.data or '' }}">
                 </label>
             </div>
         </div>
@@ -96,38 +96,64 @@
 </section>
 
 <script>
-    const registerForm = document.getElementById('register_form');
+    const volunteerFields = document.getElementById('volunteer-fields');
+    const organizationFields = document.getElementById('organization-fields');
     const selectedRoleInput = document.getElementById('selected_role');
+    const registerForm = document.getElementById('register_form');
 
-    function setRegisterRole(selectedRole) {
-        selectedRoleInput.value = selectedRole;
-        registerForm.action = `${registerForm.dataset.registerUrl}?state=${selectedRole}`;
+    function showRoleFields(role) {
+        if (role === 'volunteer') {
+            volunteerFields.classList.add('role-content-active');
+            organizationFields.classList.remove('role-content-active');
 
-        document.querySelectorAll('.role-option').forEach((item) => {
-            const isActive = item.dataset.role === selectedRole;
-            item.classList.toggle('role-option-active', isActive);
-            item.setAttribute('aria-pressed', String(isActive));
-        });
-
-        document.querySelectorAll('.role-content').forEach((content) => {
-            const isActive = content.dataset.content === selectedRole;
-            content.classList.toggle('role-content-active', isActive);
-            content.querySelectorAll('input, textarea, select').forEach((field) => {
-                if (field.type !== 'hidden') {
-                    field.disabled = !isActive;
-                }
+            volunteerFields.querySelectorAll('input, textarea, select').forEach(field => {
+                field.disabled = false;
             });
-        });
+            organizationFields.querySelectorAll('input, textarea, select').forEach(field => {
+                field.disabled = true;
+            });
+        } else {
+            volunteerFields.classList.remove('role-content-active');
+            organizationFields.classList.add('role-content-active');
 
-        window.history.replaceState({}, '', `${window.location.pathname}?state=${selectedRole}`);
+            volunteerFields.querySelectorAll('input, textarea, select').forEach(field => {
+                field.disabled = true;
+            });
+            organizationFields.querySelectorAll('input, textarea, select').forEach(field => {
+                field.disabled = false;
+            });
+        }
     }
 
-    document.querySelectorAll('.role-option').forEach((button) => {
+    document.querySelectorAll('.role-option').forEach(button => {
         button.addEventListener('click', () => {
-            setRegisterRole(button.dataset.role);
+            const role = button.dataset.role;
+            selectedRoleInput.value = role;
+
+            document.querySelectorAll('.role-option').forEach(btn => {
+                btn.classList.remove('role-option-active');
+            });
+            button.classList.add('role-option-active');
+
+            showRoleFields(role);
+
+            registerForm.action = `/register?state=${role}`;
+
+            window.history.replaceState({}, '', `/register?state=${role}`);
         });
     });
 
-    setRegisterRole(selectedRoleInput.value || 'volunteer');
+    const initialRole = selectedRoleInput.value || 'volunteer';
+    showRoleFields(initialRole);
 </script>
+
+<style>
+    .role-content {
+        display: none;
+    }
+
+    .role-content-active {
+        display: block;
+    }
+</style>
 {% endblock content %}

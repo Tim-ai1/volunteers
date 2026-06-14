@@ -12,6 +12,7 @@ class CreateTaskForm(FlaskForm):
         FileAllowed(['jpg', 'png', 'jpeg'], 'Только изображения (.jpg, .png)')
     ])
     start_date = DateTimeLocalField('Дата и время начала', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
+    end_date = DateTimeLocalField('Дата и время конца', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
     address = StringField('Адрес', validators=[DataRequired()])
     people_count = IntegerField('Количество волонтёров', validators=[DataRequired()])
     tags = StringField('Теги', validators=[DataRequired()])

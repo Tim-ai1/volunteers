@@ -9,54 +9,57 @@
 </head>
 <body>
 <main>
-    <header class="site-header">
-        <a href="{{ url_for('index') }}" class="site-logo">Волонтёриум</a>
-        <img src="{{ url_for('static', filename='images/img.png') }}" alt="несмешная картинка" class="logo">
-        {% if request.endpoint not in ['login', 'register'] %}
-        <nav class="header-actions" aria-label="Основная навигация">
-            {% if current_user.is_authenticated %}
-            <a href="{{ url_for('index') }}" class="header-link header-register">Главная</a>
-            <a href="{{ url_for('tasks') }}" class="header-link header-login">Мероприятия</a>
-            <a href="{{ url_for('profile', user_id=current_user.id) }}" class="header-link header-register">Профиль</a>
-            <a href="{{ url_for('logout') }}" class="header-link header-login">Выйти</a>
-            {% else %}
-            <a href="{{ url_for('register') }}" class="header-link header-register">Регистрация</a>
-            <a href="{{ url_for('login') }}" class="header-link header-login">Войти</a>
-            {% endif %}
-        </nav>
-        {% else %}
-        <nav class="header-actions" aria-label="Основная навигация">
-            <a href="{{ url_for('index') }}" class="auth-home-link">Главная</a>
-        </nav>
+<header class="site-header">
+    <a href="{{ url_for('index') }}" class="site-logo">Волонтёриум</a>
+    <img src="{{ url_for('static', filename='images/img.png') }}" alt="несмешная картинка" class="logo">
+    {% if request.endpoint not in ['login', 'register'] %}
+    <nav class="header-actions" aria-label="Основная навигация">
+        <a href="{{ url_for('index') }}" class="header-link header-login">Главная</a>
+        <a href="{{ url_for('tasks') }}" class="header-link header-register">Мероприятия</a>
+        {% if current_user.role_id == 2 %}
+        <a href="{{ url_for('create_task') }}" class="header-link header-register">Создать задание</a>
         {% endif %}
-    </header>
-    {% block hero %}
-    <section class="hero-banner">
-        <img src="{{ url_for('static', filename='images/banner.png') }}" alt="Главный баннер">
-        <div class="hero-overlay">
-            <div class="hero-title">Волонтёриум</div>
-            <p class="hero-subtitle">Платформа для волонтеров, организаторов и добрых дел</p>
-        </div>
-    </section>
-    {% endblock %}
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('profile', user_id=current_user.id) }}" class="header-link header-login">Профиль</a>
+        <a href="{{ url_for('logout') }}" class="header-link header-login">Выйти</a>
+        {% else %}
+        <a href="{{ url_for('register') }}" class="header-link header-register">Регистрация</a>
+        <a href="{{ url_for('login') }}" class="header-link header-login">Войти</a>
+        {% endif %}
+    </nav>
+    {% else %}
+    <nav class="header-actions" aria-label="Основная навигация">
+        <a href="{{ url_for('index') }}" class="auth-home-link">Главная</a>
+    </nav>
+    {% endif %}
+</header>
+{% block hero %}
+<section class="hero-banner">
+    <img src="{{ url_for('static', filename='images/banner.png') }}" alt="Главный баннер">
+    <div class="hero-overlay">
+        <div class="hero-title">Волонтёриум</div>
+        <p class="hero-subtitle">Платформа для волонтеров, организаторов и добрых дел</p>
+    </div>
+</section>
+{% endblock %}
     {% block content %}
     {% endblock %}
-    {% if request.endpoint not in ['login', 'register'] %}
-    <footer id="main-footer">
-        <div>
-            <h3>Почта</h3>
-            <h4>strategy@strategy48.ru</h4>
-        </div>
-        <div>
-            <h3>Горячая линиия</h3>
-            <h4>+7 (474) 256-61-06</h4>
-        </div>
-        <div>
-            <h3>Адрес</h3>
-            <h4>ул. 40 лет Октября, 39, Липецк.</h4>
-        </div>
-    </footer>
-    {% endif %}
+{% if request.endpoint not in ['login', 'register'] %}
+<footer id="main-footer">
+<div>
+    <h3>Почта</h3>
+    <h4>strategy@strategy48.ru</h4>
+</div>
+<div>
+    <h3>Горячая линиия</h3>
+    <h4>+7 (474) 256-61-06</h4>
+</div>
+<div>
+    <h3>Адрес</h3>
+    <h4>ул. 40 лет Октября, 39, Липецк.</h4>
+</div>
+</footer>
+{% endif %}
 </main>
 </body>
 </html>

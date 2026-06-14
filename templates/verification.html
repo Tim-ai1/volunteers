@@ -1,23 +1,30 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Верификация</title>
-</head>
-<body>
-    <h2>Подтверждение регистрации</h2>
+{% extends "base.html" %}
 
-    {% if error %}
-        <div style="color: red; margin-bottom: 10px;">
-            {{ error }}
+{% block hero %}{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+    <form class="auth-card verification-card" method="post">
+        {{ form.hidden_tag() }}
+
+        <div class="reg_label">
+            <h2>Подтверждение регистрации</h2>
         </div>
-    {% endif %}
 
-    <form method="POST">
-        {{ form.csrf_token }}
-        {{ form.code.label }}<br>
-        {{ form.code(size=6, maxlength=6) }}<br><br>
-        {{ form.submit() }}
+        <p class="verification-text">
+            Введите 6-значный код подтверждения, чтобы создать аккаунт.
+        </p>
+
+        {% if error %}
+            <p class="auth-error">{{ error }}</p>
+        {% endif %}
+
+        <label class="form-field verification-code-field" for="code">
+            <span>{{ form.code.label.text }}</span>
+            {{ form.code(id="code", placeholder="000000", maxlength="6", autocomplete="one-time-code") }}
+        </label>
+
+        {{ form.submit(class="auth_button") }}
     </form>
-</body>
-</html>
+</section>
+{% endblock %}

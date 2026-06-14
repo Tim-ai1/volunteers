@@ -3,29 +3,43 @@
 {% block hero %}{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
 <section class="task-detail">
     <h1>{{ task.name }}</h1>
 
     <div class="task-detail-grid">
         <div class="task-detail-info">
             <p><strong>Название:</strong> {{ task.name }}</p>
-            <p><strong>Дата:</strong> {{ task.start_date.strftime('%d.%m.%Y %H:%M') if task.start_date else 'Не указана' }}</p>
-            {% if organizer %}
-                <p><strong>Организатор:</strong> {{ organizer }}</p>
-            {% endif %}
-            {% if organizer_phone %}
-                <p><strong>Телефон организатора:</strong> {{ organizer_phone }}</p>
-            {% endif %}
+            <p><strong>Дата начала:</strong> {{ task.start_date.strftime('%d.%m.%Y %H:%M') if task.start_date else 'Не указана' }}</p>
+            <p><strong>Дата конца:</strong> {{ task.end_date.strftime('%d.%m.%Y %H:%M') if task.end_date else 'Не указана' }}</p>
+            <p><strong>Организатор:</strong> <a href="{{ url_for('profile', user_id=task.author_id) }}" class="organizer-link">{{ org.name }}</a></p>
+            <p><strong>Телефон организатора:</strong> {{ org.phone_number }}</p>
             <p><strong>Локация:</strong> {{ task.address }}</p>
             <p><strong>Направление:</strong> {{ task.tags }}</p>
             <p><strong>Мест:</strong> {{ task.people_count }}</p>
-            <p><strong>Фото:</strong> {% if task.url_pic %}Загружено{% else %}Не загружено{% endif %}</p>
-            <p class="task-description"><strong>Описание:</strong> {{ description or 'Описание не указано' }}</p>
+            <p class="task-description"><strong>Описание:</strong> {{ task.info or 'Описание не указано' }}</p>
         </div>
 
         <div class="task-detail-media">
-            {% if task.url_pic %}
-                <img src="{{ url_for('static', filename=task.url_pic.split(',')[0]) }}" alt="Фото мероприятия">
+            {% set photos = task.url_pic.split(',') if task.url_pic else [] %}
+
+            {% if photos|length > 0 %}
+                <div class="swiper task-photo-swiper">
+                    <div class="swiper-wrapper">
+                        {% for photo in photos %}
+                        <div class="swiper-slide">
+                            <img src="{{ url_for('static', filename='upload/tasks/' + task.id|string + '/' + photo.strip()) }}" alt="Фото мероприятия {{ loop.index }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+
+                    <div class="swiper-pagination"></div>
+                </div>
             {% else %}
                 <div class="task-image-placeholder task-detail-placeholder">Мероприятие</div>
             {% endif %}
@@ -33,13 +47,43 @@
     </div>
 
     <div class="task-detail-actions">
-        {% if current_user.is_authenticated and current_user.role_id == 1 %}
+        {% if task.is_archived %}
+            <p class="task-note">Мероприятие уже закончилось.</p>
+        {% elif (current_user.id,) in users %}
+            <p class="task-note">Вы уже записались на это мероприятие.</p>
+        {% elif current_user.is_authenticated and current_user.role_id == 1 %}
             <a class="task-action-link task-detail-button" href="{{ url_for('take_part', task_id=task.id) }}">Принять участие</a>
         {% elif current_user.is_authenticated and current_user.role_id == 2 %}
             <p class="task-note">Организатор может просматривать мероприятие, но не записывается на него.</p>
-        {% else %}
+        {% elif not current_user.is_authenticated %}
             <p class="task-note">Чтобы принять участие, сначала зарегистрируйтесь или войдите.</p>
         {% endif %}
     </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const photosCount = {{ photos|length }};
+        new Swiper('.task-photo-swiper', {
+            loop: photosCount > 1,
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            effect: 'slide',
+            speed: 400,
+            grabCursor: true,
+            spaceBetween: 0,
+            slidesPerView: 1,
+            autoplay: {
+                delay: 3000,
+                disableOnInteraction: false,
+            },
+        });
+    });
+</script>
 {% endblock %}

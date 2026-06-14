@@ -11,23 +11,44 @@
                 <div class="profile-event-list">
                     {% set active_count = namespace(value=0) %}
                     {% for task in tasks %}
-                        {% if task and not task.is_archived %}
-                            {% set active_count.value = active_count.value + 1 %}
-                            <a class="profile-event-card" href="{{ url_for('task', task_id=task.id) }}">
+                    {% if task.is_accepted %}
+                    {% if task and not task.is_archived %}
+                    {% set active_count.value = active_count.value + 1 %}
+                    <div class="profile-event-item">
+                        <div class="profile-event-card">
+                            <a href="{{ url_for('task', task_id=task.id) }}" class="profile-event-link">
                                 {% if task.url_pic %}
-                                    <img src="{{ url_for('static', filename=task.url_pic.split(',')[0]) }}" alt="Фото мероприятия">
+                                <img src="{{ url_for('static', filename='upload/tasks/' + task.id|string + '/' + task.url_pic.split(',')[0]) }}"
+                                     alt="Фото мероприятия">
                                 {% else %}
-                                    <span class="profile-event-placeholder"></span>
+                                <div class="profile-event-placeholder"></div>
                                 {% endif %}
-                                <span>
+                                <div class="profile-event-info">
                                     <strong>{{ task.name }}</strong>
-                                    <small>{{ task.start_date.strftime('%d.%m.%Y %H:%M') if task.start_date else 'Дата не указана' }}</small>
-                                </span>
+                                    <small>{{ task.start_date.strftime('%d.%m.%Y %H:%M') if task.start_date else 'Дата
+                                        не указана' }}</small>
+                                </div>
                             </a>
-                        {% endif %}
+                            {% if current_user.role_id == 3 or current_user.id == task.author_id %}
+                            <div class="event-dropdown">
+                                <button class="dropdown-trigger" data-task-id="{{ task.id }}"
+                                        data-task-name="{{ task.name }}">
+                                    ⋮
+                                </button>
+                                <div class="dropdown-menu" id="dropdown-{{ task.id }}">
+                                    <button class="dropdown-item finish-task" data-task-id="{{ task.id }}">
+                                        ✓ Закончить мероприятие
+                                    </button>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
                     {% endfor %}
                     {% if active_count.value == 0 %}
-                        <p class="profile-empty">Пока активных мероприятий нет.</p>
+                    <p class="profile-empty">Пока активных мероприятий нет.</p>
                     {% endif %}
                 </div>
 
@@ -35,47 +56,122 @@
                 <div class="profile-event-list">
                     {% set archive_count = namespace(value=0) %}
                     {% for task in tasks %}
-                        {% if task and task.is_archived %}
-                            {% set archive_count.value = archive_count.value + 1 %}
-                            <a class="profile-event-card profile-event-card-muted" href="{{ url_for('task', task_id=task.id) }}">
-                                {% if task.url_pic %}
-                                    <img src="{{ url_for('static', filename=task.url_pic.split(',')[0]) }}" alt="Фото мероприятия">
-                                {% else %}
-                                    <span class="profile-event-placeholder"></span>
-                                {% endif %}
-                                <span>
-                                    <strong>{{ task.name }}</strong>
-                                    <small>{{ task.start_date.strftime('%d.%m.%Y %H:%M') if task.start_date else 'Дата не указана' }}</small>
-                                </span>
-                            </a>
-                        {% endif %}
+                    {% if task and task.is_archived %}
+                    {% set archive_count.value = archive_count.value + 1 %}
+                    <div class="profile-event-item">
+                        <a class="profile-event-card profile-event-card-muted"
+                           href="{{ url_for('task', task_id=task.id) }}">
+                            {% if task.url_pic %}
+                            <img src="{{ url_for('static', filename='upload/tasks/' + task.id|string + '/' + task.url_pic.split(',')[0]) }}"
+                                 alt="Фото мероприятия">
+                            {% else %}
+                            <div class="profile-event-placeholder"></div>
+                            {% endif %}
+                            <div class="profile-event-info">
+                                <strong>{{ task.name }}</strong>
+                                <small>{{ task.start_date.strftime('%d.%m.%Y %H:%M') if task.start_date else 'Дата не
+                                    указана' }}</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
                     {% endfor %}
                     {% if archive_count.value == 0 %}
-                        <p class="profile-empty">Архивных мероприятий пока нет.</p>
+                    <p class="profile-empty">Архивных мероприятий пока нет.</p>
                     {% endif %}
                 </div>
             </section>
 
             <aside class="profile-data-card">
-                <h2>Персональные данные</h2>
+                {% if user.role_id == 2 %}
+                <h2>Организация</h2>
+                {% elif user.role_id == 1 %}
+                <h2>Волонтёр</h2>
+                {% endif %}
 
                 {% if user.role_id == 2 %}
-                    <p><strong>Название:</strong> {{ user.name or 'Не указано' }}</p>
-                    <p><strong>Почта:</strong> {{ user.email or 'Не указана' }}</p>
-                    <p><strong>Адрес:</strong> {{ user.address or 'Не указан' }}</p>
-                    <p><strong>Телефон:</strong> {{ user.phone_number or 'Не указан' }}</p>
-                    <p><strong>Об организации:</strong> {{ user.info or 'Не указано' }}</p>
+                <p><strong>Название:</strong> {{ user.name or 'Не указано' }}</p>
+                {% if current_user.id == user.role_id %}
+                <p><strong>Почта:</strong> {{ user.email or 'Не указана' }}</p>
+                {% endif %}
+                <p><strong>Адрес:</strong> {{ user.address or 'Не указан' }}</p>
+                <p><strong>Телефон:</strong> {{ user.phone_number or 'Не указан' }}</p>
+                <p><strong>Об организации:</strong> {{ user.info or 'Не указано' }}</p>
                 {% else %}
-                    {% set name_parts = (user.name or '').split(' ', 1) %}
-                    <p><strong>Имя:</strong> {{ name_parts[0] if name_parts and name_parts[0] else 'Не указано' }}</p>
-                    <p><strong>Фамилия:</strong> {{ name_parts[1] if name_parts|length > 1 else 'Не указана' }}</p>
-                    <p><strong>Почта:</strong> {{ user.email or 'Не указана' }}</p>
-                    <p><strong>О себе:</strong> {{ user.info or 'Не указано' }}</p>
-                    <p><strong>Дата рождения:</strong> {{ user.birth_date.strftime('%d.%m.%Y') if user.birth_date else 'Не указана' }}</p>
-                    <p><strong>Телефон:</strong> {{ user.phone_number or 'Не указан' }}</p>
+                {% set name_parts = (user.name or '').split(' ', 1) %}
+                <p><strong>Имя:</strong> {{ name_parts[0] if name_parts and name_parts[0] else 'Не указано' }}</p>
+                {% if current_user.id == user.role_id %}
+                <p><strong>Почта:</strong> {{ user.email or 'Не указана' }}</p>
+                {% endif %}
+                <p><strong>О себе:</strong> {{ user.info or 'Не указано' }}</p>
+                <p><strong>Дата рождения:</strong> {{ user.birth_date.strftime('%d.%m.%Y') if user.birth_date else 'Не
+                    указана' }}</p>
+                {% if current_user.id == user.role_id %}
+                <p><strong>Телефон:</strong> {{ user.phone_number or 'Не указан' }}</p>
+                {% endif %}
                 {% endif %}
             </aside>
         </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.event-dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+
+        document.querySelectorAll('.dropdown-trigger').forEach(trigger => {
+            trigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                const taskId = this.dataset.taskId;
+                const menu = document.getElementById(`dropdown-${taskId}`);
+
+                document.querySelectorAll('.dropdown-menu').forEach(m => {
+                    if (m !== menu) m.classList.remove('show');
+                });
+
+                menu.classList.toggle('show');
+            });
+        });
+
+        document.querySelectorAll('.finish-task').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                const taskId = this.dataset.taskId;
+
+                if (confirm('Вы уверены, что хотите завершить это мероприятие? Оно переместится в архив.')) {
+                    fetch(`/task/${taskId}/finish`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Ошибка: ' + (data.message || 'Не удалось завершить мероприятие'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Произошла ошибка при завершении мероприятия');
+                    });
+                }
+
+                const menu = document.getElementById(`dropdown-${taskId}`);
+                if (menu) menu.classList.remove('show');
+            });
+        });
+    });
+</script>
 {% endblock %}
